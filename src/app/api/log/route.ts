@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql, initDb } from '@/lib/db';
+import { sql, initDb, isDatabaseConfigured } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isDatabaseConfigured() || !sql) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
+
     const data = await req.json();
     const { date, type, value, note, rounds, pullup_sets, pushup_sets } = data;
 
@@ -17,6 +24,13 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
+    if (!isDatabaseConfigured() || !sql) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
+
     const logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC, created_at DESC`;
     return NextResponse.json(logs);
   } catch (error: any) {
@@ -26,6 +40,13 @@ export async function GET() {
 
 export async function DELETE(req: NextRequest) {
   try {
+    if (!isDatabaseConfigured() || !sql) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     
@@ -42,6 +63,13 @@ export async function DELETE(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
+    if (!isDatabaseConfigured() || !sql) {
+      return NextResponse.json(
+        { success: false, error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
+
     const data = await req.json();
     const { id, rounds, note } = data;
     
