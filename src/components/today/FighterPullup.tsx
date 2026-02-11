@@ -78,7 +78,7 @@ export function FighterPullup({ pullupDay, todayStr, todaySets, todayTotal }: Pr
           <CheckCircle2 size={24} className="text-emerald-500" />
         </div>
       )}
-      <div className="flex items-center justify-between mb-3">
+      <div className={`flex items-center justify-between mb-3 ${alreadyLogged ? 'pr-9' : ''}`}>
         <h3 className="font-semibold text-slate-800 text-sm">Fighter Pullups</h3>
         <span className="text-xs text-slate-500 bg-zinc-100 px-2 py-0.5 rounded-full">
           {pullupDay.program} Day {pullupDay.day}
