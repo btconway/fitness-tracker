@@ -10,15 +10,18 @@ export default async function Dashboard() {
   const logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC, created_at DESC`;
   
   // Calculate current day in CST
+  // Start date: Feb 10, 2026 was Day 1 (AB Complex)
   const startDate = new Date('2026-02-10T00:00:00-06:00');
   const nowUTC = new Date();
   // Get CST date string (format: MM/DD/YYYY)
   const cstDateStr = nowUTC.toLocaleDateString('en-US', { timeZone: 'America/Chicago' });
   const [month, day, year] = cstDateStr.split('/');
-  const nowCST = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  // Create nowCST as midnight in CST timezone (not local timezone)
+  const nowCST = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00-06:00`);
   const diffTime = Math.abs(nowCST.getTime() - startDate.getTime());
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  const currentDay = (diffDays % 28);
+  // currentDay should be: Feb 10 = 0 (Day 1), Feb 11 = 1 (Day 2), etc.
+  const currentDay = diffDays % 28;
   const todaysPlan = ABF4FL_PROGRAM[currentDay];
 
   const completedWorkouts = logs.filter(l => l.type === 'WORKOUT' && l.value === 'COMPLETED').length;
