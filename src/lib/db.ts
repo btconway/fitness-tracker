@@ -9,8 +9,17 @@ if (!process.env.DATABASE_URL) {
 
 const DATABASE_URL = process.env.DATABASE_URL || '';
 
-// Only create SQL client if DATABASE_URL is actually set
-export const sql = DATABASE_URL ? neon(DATABASE_URL) : null;
+// Only create SQL client if DATABASE_URL is actually set and valid
+let sql: ReturnType<typeof neon> | null = null;
+try {
+  if (DATABASE_URL && DATABASE_URL.startsWith('postgres')) {
+    sql = neon(DATABASE_URL);
+  }
+} catch (error) {
+  console.error('Failed to initialize database client:', error);
+}
+
+export { sql };
 
 // Helper to check if database is configured
 export function isDatabaseConfigured(): boolean {

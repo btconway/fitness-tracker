@@ -49,9 +49,15 @@ export default async function Dashboard() {
     );
   }
 
-  let logs = [];
+  let logs: any[] = [];
   try {
-    logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC, created_at DESC`;
+    const rawLogs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC, created_at DESC`;
+    // Convert date objects to strings to avoid React serialization errors
+    logs = (Array.isArray(rawLogs) ? rawLogs : []).map((log: any) => ({
+      ...log,
+      date: typeof log.date === 'object' ? log.date.toISOString().split('T')[0] : log.date,
+      created_at: typeof log.created_at === 'object' ? log.created_at.toISOString() : log.created_at
+    }));
   } catch (error) {
     console.error('Database query failed:', error);
     return (
@@ -540,7 +546,7 @@ export default async function Dashboard() {
                   {log.type === 'WEIGHT' && <p className="text-sm text-slate-700">{parseFloat(log.value).toFixed(1)} lbs</p>}
                 </div>
                 <p className="text-sm font-mono text-slate-500 ml-4">
-                  {new Date(log.date).toLocaleDateString()}
+                  {new Date(log.date + 'T00:00:00').toLocaleDateString()}
                 </p>
               </div>
             ))}
