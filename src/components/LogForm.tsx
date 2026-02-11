@@ -5,10 +5,11 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
 
 export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
-  const [type, setType] = useState<'WORKOUT' | 'STEPS'>('WORKOUT');
+  const [type, setType] = useState<'WORKOUT' | 'STEPS' | 'WEIGHT'>('WORKOUT');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [rounds, setRounds] = useState('');
   const [steps, setSteps] = useState('');
+  const [weight, setWeight] = useState('');
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -20,7 +21,7 @@ export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
       const payload: any = {
         date,
         type,
-        value: type === 'WORKOUT' ? 'COMPLETED' : steps,
+        value: type === 'WORKOUT' ? 'COMPLETED' : type === 'STEPS' ? steps : weight,
         note: note || null,
       };
 
@@ -38,6 +39,7 @@ export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
         // Reset form
         setRounds('');
         setSteps('');
+        setWeight('');
         setNote('');
         if (onSuccess) onSuccess();
         window.location.reload();
@@ -80,11 +82,12 @@ export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
               </label>
               <select
                 value={type}
-                onChange={(e) => setType(e.target.value as 'WORKOUT' | 'STEPS')}
+                onChange={(e) => setType(e.target.value as 'WORKOUT' | 'STEPS' | 'WEIGHT')}
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
               >
                 <option value="WORKOUT">Workout</option>
                 <option value="STEPS">Steps</option>
+                <option value="WEIGHT">Weight</option>
               </select>
             </div>
           </div>
@@ -119,6 +122,24 @@ export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
                 placeholder="e.g., 10000"
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-500"
                 required={type === 'STEPS'}
+              />
+            </div>
+          )}
+
+          {type === 'WEIGHT' && (
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-1">
+                Weight (lbs)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                placeholder="e.g., 185.5"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-500"
+                required={type === 'WEIGHT'}
               />
             </div>
           )}

@@ -2,7 +2,7 @@ import { sql } from '@/lib/db';
 import { ABF4FL_PROGRAM } from '@/lib/program';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { LogForm } from '@/components/LogForm';
-import { CheckCircle2, Circle, Trophy, Flame, TrendingUp, Target } from 'lucide-react';
+import { CheckCircle2, Circle, Trophy, Flame, TrendingUp, Target, Scale } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +34,12 @@ export default async function Dashboard() {
     ? Math.round((prescribedWorkouts / workoutLogs.length) * 100) 
     : 0;
 
+  // Weight tracking
+  const weightLogs = logs.filter(l => l.type === 'WEIGHT');
+  const latestWeight = weightLogs.length > 0 ? parseFloat(weightLogs[0].value) : null;
+  const startWeight = weightLogs.length > 0 ? parseFloat(weightLogs[weightLogs.length - 1].value) : null;
+  const weightChange = latestWeight && startWeight ? (latestWeight - startWeight).toFixed(1) : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 p-8">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -48,7 +54,7 @@ export default async function Dashboard() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Card className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white border-0 shadow-lg">
             <CardContent className="pt-6">
               <div className="flex justify-between items-center">
@@ -94,6 +100,29 @@ export default async function Dashboard() {
                   <p className="text-3xl font-bold text-slate-800">{prescribedPercentage}%</p>
                 </div>
                 <Target size={40} className="text-blue-500 opacity-40" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border-blue-200 shadow-md">
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-slate-600">Current Weight</p>
+                  {latestWeight ? (
+                    <>
+                      <p className="text-3xl font-bold text-slate-800">{latestWeight}</p>
+                      {weightChange && (
+                        <p className="text-xs text-slate-500 mt-1">
+                          {parseFloat(weightChange) > 0 ? '+' : ''}{weightChange} lbs
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-xl text-slate-400">No data</p>
+                  )}
+                </div>
+                <Scale size={40} className="text-purple-500 opacity-40" />
               </div>
             </CardContent>
           </Card>
@@ -186,6 +215,7 @@ export default async function Dashboard() {
                   )}
                   {log.note && <p className="text-sm text-slate-600 mt-1">{log.note}</p>}
                   {log.type === 'STEPS' && <p className="text-sm text-slate-700">{parseInt(log.value).toLocaleString()} steps</p>}
+                  {log.type === 'WEIGHT' && <p className="text-sm text-slate-700">{parseFloat(log.value).toFixed(1)} lbs</p>}
                 </div>
                 <p className="text-sm font-mono text-slate-500 ml-4">
                   {new Date(log.date).toLocaleDateString()}
