@@ -1,14 +1,80 @@
-import { sql } from '@/lib/db';
+import { sql, isDatabaseConfigured } from '@/lib/db';
 import { ABF4FL_PROGRAM, getFighterPullupDay } from '@/lib/program';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { LogForm } from '@/components/LogForm';
 import { QuickLog } from '@/components/QuickLog';
-import { CheckCircle2, Circle, Trophy, Flame, TrendingUp, Target, Scale, Dumbbell } from 'lucide-react';
+import { CheckCircle2, Circle, Trophy, Flame, TrendingUp, Target, Scale, Dumbbell, AlertTriangle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Dashboard() {
-  const logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC, created_at DESC`;
+  // Check if database is configured
+  if (!isDatabaseConfigured() || !sql) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 p-8 flex items-center justify-center">
+        <Card className="max-w-2xl border-amber-400 border-2">
+          <CardHeader className="bg-amber-50">
+            <CardTitle className="flex items-center gap-2 text-amber-900">
+              <AlertTriangle size={24} className="text-amber-600" />
+              Database Not Configured
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <p className="text-slate-700">
+                The fitness tracker app requires a database connection to function. 
+                The <code className="bg-slate-100 px-2 py-1 rounded">DATABASE_URL</code> environment 
+                variable is not set.
+              </p>
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded-md">
+                <p className="font-semibold text-blue-900 mb-2">To fix this:</p>
+                <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
+                  <li>Go to your Vercel project settings</li>
+                  <li>Navigate to Environment Variables</li>
+                  <li>Add <code className="bg-white px-1 rounded">DATABASE_URL</code> with your Neon database connection string</li>
+                  <li>Format: <code className="bg-white px-1 rounded text-xs">postgresql://user:password@host/database</code></li>
+                  <li>Redeploy the application</li>
+                </ol>
+              </div>
+              <div className="bg-slate-50 border border-slate-200 p-4 rounded-md">
+                <p className="font-semibold text-slate-900 mb-2">Need a Neon database?</p>
+                <p className="text-sm text-slate-700">
+                  Sign up for free at <a href="https://neon.tech" className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">neon.tech</a>
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  let logs = [];
+  try {
+    logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC, created_at DESC`;
+  } catch (error) {
+    console.error('Database query failed:', error);
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 p-8 flex items-center justify-center">
+        <Card className="max-w-2xl border-red-400 border-2">
+          <CardHeader className="bg-red-50">
+            <CardTitle className="flex items-center gap-2 text-red-900">
+              <AlertTriangle size={24} className="text-red-600" />
+              Database Connection Error
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <p className="text-slate-700 mb-4">
+              Failed to connect to the database. Please check your database configuration and try again.
+            </p>
+            <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded font-mono">
+              {error instanceof Error ? error.message : 'Unknown error'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   // Calculate current day in CST
   // Start date: Feb 10, 2026 was Day 1 (AB Complex)

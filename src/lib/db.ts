@@ -1,43 +1,65 @@
 import { neon } from '@neondatabase/serverless';
 
-// During build time, DATABASE_URL might not be set
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/fitness_tracker';
+// Validate DATABASE_URL is set
+if (!process.env.DATABASE_URL) {
+  console.error('⚠️  DATABASE_URL environment variable is not set!');
+  console.error('To fix: Add DATABASE_URL to your Vercel environment variables');
+  console.error('Format: postgresql://user:password@host/database');
+}
 
-export const sql = neon(DATABASE_URL);
+const DATABASE_URL = process.env.DATABASE_URL || '';
+
+// Only create SQL client if DATABASE_URL is actually set
+export const sql = DATABASE_URL ? neon(DATABASE_URL) : null;
+
+// Helper to check if database is configured
+export function isDatabaseConfigured(): boolean {
+  return !!DATABASE_URL && DATABASE_URL !== '';
+}
 
 export async function initDb() {
-  await sql`
-    CREATE TABLE IF NOT EXISTS fitness_logs (
-      id SERIAL PRIMARY KEY,
-      created_at TIMESTAMPTZ DEFAULT NOW(),
-      date DATE NOT NULL,
-      type VARCHAR(50) NOT NULL,
-      value TEXT NOT NULL,
-      rounds INTEGER,
-      pullup_sets TEXT,
-      pushup_sets TEXT,
-      note TEXT
-    );
-  `;
-  
-  // Add rounds column if it doesn't exist (migration)
-  try {
-    await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS rounds INTEGER`;
-  } catch (error) {
-    // Column might already exist, ignore error
+  if (!sql) {
+    console.error('Cannot initialize database: DATABASE_URL not configured');
+    return;
   }
-  
-  // Add pullup_sets column if it doesn't exist (migration)
+
   try {
-    await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS pullup_sets TEXT`;
+    await sql`
+      CREATE TABLE IF NOT EXISTS fitness_logs (
+        id SERIAL PRIMARY KEY,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        date DATE NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        value TEXT NOT NULL,
+        rounds INTEGER,
+        pullup_sets TEXT,
+        pushup_sets TEXT,
+        note TEXT
+      );
+    `;
+    
+    // Add rounds column if it doesn't exist (migration)
+    try {
+      await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS rounds INTEGER`;
+    } catch (error) {
+      // Column might already exist, ignore error
+    }
+    
+    // Add pullup_sets column if it doesn't exist (migration)
+    try {
+      await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS pullup_sets TEXT`;
+    } catch (error) {
+      // Column might already exist, ignore error
+    }
+    
+    // Add pushup_sets column if it doesn't exist (migration)
+    try {
+      await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS pushup_sets TEXT`;
+    } catch (error) {
+      // Column might already exist, ignore error
+    }
   } catch (error) {
-    // Column might already exist, ignore error
-  }
-  
-  // Add pushup_sets column if it doesn't exist (migration)
-  try {
-    await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS pushup_sets TEXT`;
-  } catch (error) {
-    // Column might already exist, ignore error
+    console.error('Database initialization failed:', error);
+    throw error;
   }
 }
