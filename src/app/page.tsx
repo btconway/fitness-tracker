@@ -150,31 +150,61 @@ export default async function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-end gap-2 h-32">
-                {weightLogs.slice(0, 10).reverse().map((log, i) => {
-                  const weight = parseFloat(log.value);
-                  const minWeight = Math.min(...weightLogs.map(l => parseFloat(l.value)));
-                  const maxWeight = Math.max(...weightLogs.map(l => parseFloat(l.value)));
-                  const range = maxWeight - minWeight || 10; // Default range if all same
-                  const height = ((weight - minWeight) / range) * 80 + 20; // 20-100% scale
-                  
-                  return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <div className="relative">
+                <div className="flex items-end gap-2 h-32 relative">
+                  {weightLogs.slice(0, 10).reverse().map((log, i) => {
+                    const weight = parseFloat(log.value);
+                    const minWeight = Math.min(Math.min(...weightLogs.map(l => parseFloat(l.value))), 190); // Include goal in range
+                    const maxWeight = Math.max(...weightLogs.map(l => parseFloat(l.value)));
+                    const range = maxWeight - minWeight || 10;
+                    const height = ((weight - minWeight) / range) * 80 + 20;
+                    
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-1 relative">
+                        <div 
+                          className="w-full bg-purple-500 rounded-t-md transition-all" 
+                          style={{ height: `${height}%` }} 
+                        />
+                        <span className="text-xs font-mono text-slate-600">{weight.toFixed(1)}</span>
+                      </div>
+                    );
+                  })}
+                  {/* Goal line at 190 lbs */}
+                  {(() => {
+                    const minWeight = Math.min(Math.min(...weightLogs.map(l => parseFloat(l.value))), 190);
+                    const maxWeight = Math.max(...weightLogs.map(l => parseFloat(l.value)));
+                    const range = maxWeight - minWeight || 10;
+                    const goalHeight = ((190 - minWeight) / range) * 80 + 20;
+                    return (
                       <div 
-                        className="w-full bg-purple-500 rounded-t-md transition-all" 
-                        style={{ height: `${height}%` }} 
-                      />
-                      <span className="text-xs font-mono text-slate-600">{weight.toFixed(1)}</span>
-                    </div>
-                  );
-                })}
+                        className="absolute left-0 right-0 border-t-2 border-dashed border-emerald-500"
+                        style={{ bottom: `${goalHeight}%` }}
+                        title="Goal: 190 lbs by April 26, 2026"
+                      >
+                        <span className="absolute right-0 -top-2 text-xs font-semibold text-emerald-600 bg-white px-1">
+                          Goal: 190
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </div>
               </div>
               {weightChange && (
-                <div className="mt-4 text-sm text-slate-600">
-                  <span className="font-semibold">
-                    {parseFloat(weightChange) > 0 ? '▲' : '▼'} {Math.abs(parseFloat(weightChange))} lbs
-                  </span>
-                  {' '}since start
+                <div className="mt-4 space-y-2">
+                  <div className="text-sm text-slate-600">
+                    <span className="font-semibold">
+                      {parseFloat(weightChange) > 0 ? '▲' : '▼'} {Math.abs(parseFloat(weightChange))} lbs
+                    </span>
+                    {' '}since start
+                  </div>
+                  {latestWeight && latestWeight > 190 && (
+                    <div className="text-sm text-slate-600">
+                      <span className="font-semibold text-emerald-600">
+                        {(latestWeight - 190).toFixed(1)} lbs to goal
+                      </span>
+                      {' '}(Target: 190 lbs by April 26, 2026)
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -218,6 +248,99 @@ export default async function Dashboard() {
                   <div className="w-3 h-3 bg-amber-500 rounded" />
                   <span>&lt;3 rounds</span>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Pull-up Progress */}
+        {logs.filter(l => l.type === 'PULLUP').length > 0 && (
+          <Card className="bg-white border-blue-200 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-slate-800 flex items-center gap-2">
+                <Dumbbell className="text-indigo-600" size={20} />
+                Pull-up Log
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {logs.filter(l => l.type === 'PULLUP').slice(0, 10).map((log, i) => {
+                  const sets = log.pullup_sets ? log.pullup_sets.split(',').map((s: string) => parseInt(s.trim())) : [];
+                  const total = sets.reduce((a: number, b: number) => a + b, 0);
+                  
+                  return (
+                    <div key={i} className="border-b border-slate-100 pb-2 last:border-0">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm font-medium text-slate-700">{log.date}</span>
+                        <span className="text-sm font-bold text-indigo-600">{total} total reps</span>
+                      </div>
+                      <div className="flex gap-1">
+                        {sets.map((reps: number, j: number) => (
+                          <div 
+                            key={j} 
+                            className="flex-1 bg-indigo-100 text-indigo-700 text-center py-1 rounded text-xs font-mono"
+                          >
+                            {reps}
+                          </div>
+                        ))}
+                      </div>
+                      {log.note && (
+                        <p className="text-xs text-slate-500 mt-1 italic">{log.note}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Push-up Progress (Grease the Groove) */}
+        {logs.filter(l => l.type === 'PUSHUP').length > 0 && (
+          <Card className="bg-white border-emerald-200 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-slate-800 flex items-center gap-2">
+                <Dumbbell className="text-emerald-600" size={20} />
+                Push-up Log (GTG)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {logs.filter(l => l.type === 'PUSHUP').slice(0, 10).map((log, i) => {
+                  const sets = log.pushup_sets ? log.pushup_sets.split(',').map((s: string) => parseInt(s.trim())) : [];
+                  const total = sets.reduce((a: number, b: number) => a + b, 0);
+                  
+                  return (
+                    <div key={i} className="border-b border-slate-100 pb-2 last:border-0">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm font-medium text-slate-700">{log.date}</span>
+                        <span className="text-sm font-bold text-emerald-600">{total} total reps • {sets.length} sets</span>
+                      </div>
+                      <div className="flex gap-1 flex-wrap">
+                        {sets.map((reps: number, j: number) => (
+                          <div 
+                            key={j} 
+                            className="bg-emerald-100 text-emerald-700 text-center px-2 py-1 rounded text-xs font-mono"
+                          >
+                            {reps}
+                          </div>
+                        ))}
+                      </div>
+                      {log.note && (
+                        <p className="text-xs text-slate-500 mt-1 italic">{log.note}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-md">
+                <p className="text-xs text-emerald-900 font-semibold mb-1">GTG Protocol:</p>
+                <ul className="text-xs text-emerald-800 space-y-1">
+                  <li>• 5-10 sets throughout the day</li>
+                  <li>• 50-80% of your max (never to failure)</li>
+                  <li>• At least 15 min between sets</li>
+                  <li>• Focus on perfect form every rep</li>
+                </ul>
               </div>
             </CardContent>
           </Card>

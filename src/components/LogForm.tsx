@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
 
 export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
-  const [type, setType] = useState<'WORKOUT' | 'STEPS' | 'WEIGHT'>('WORKOUT');
+  const [type, setType] = useState<'WORKOUT' | 'STEPS' | 'WEIGHT' | 'PULLUP' | 'PUSHUP'>('WORKOUT');
   // Get current date in CST (YYYY-MM-DD format)
   const now = new Date();
   const cstDateStr = now.toLocaleDateString('en-US', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -15,6 +15,8 @@ export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
   const [rounds, setRounds] = useState('');
   const [steps, setSteps] = useState('');
   const [weight, setWeight] = useState('');
+  const [pullupSets, setPullupSets] = useState('');
+  const [pushupSets, setPushupSets] = useState('');
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -26,12 +28,20 @@ export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
       const payload: any = {
         date,
         type,
-        value: type === 'WORKOUT' ? 'COMPLETED' : type === 'STEPS' ? steps : weight,
+        value: type === 'WORKOUT' ? 'COMPLETED' : type === 'STEPS' ? steps : type === 'PULLUP' ? pullupSets : type === 'PUSHUP' ? pushupSets : weight,
         note: note || null,
       };
 
       if (type === 'WORKOUT' && rounds) {
         payload.rounds = parseInt(rounds);
+      }
+
+      if (type === 'PULLUP' && pullupSets) {
+        payload.pullup_sets = pullupSets;
+      }
+
+      if (type === 'PUSHUP' && pushupSets) {
+        payload.pushup_sets = pushupSets;
       }
 
       const response = await fetch('/api/log', {
@@ -45,6 +55,8 @@ export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
         setRounds('');
         setSteps('');
         setWeight('');
+        setPullupSets('');
+        setPushupSets('');
         setNote('');
         if (onSuccess) onSuccess();
         window.location.reload();
@@ -87,12 +99,14 @@ export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
               </label>
               <select
                 value={type}
-                onChange={(e) => setType(e.target.value as 'WORKOUT' | 'STEPS' | 'WEIGHT')}
+                onChange={(e) => setType(e.target.value as 'WORKOUT' | 'STEPS' | 'WEIGHT' | 'PULLUP' | 'PUSHUP')}
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
               >
                 <option value="WORKOUT">Workout</option>
                 <option value="STEPS">Steps</option>
                 <option value="WEIGHT">Weight</option>
+                <option value="PULLUP">Pull-ups</option>
+                <option value="PUSHUP">Push-ups</option>
               </select>
             </div>
           </div>
@@ -146,6 +160,40 @@ export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-500"
                 required={type === 'WEIGHT'}
               />
+            </div>
+          )}
+
+          {type === 'PULLUP' && (
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-1">
+                Pull-up Sets (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={pullupSets}
+                onChange={(e) => setPullupSets(e.target.value)}
+                placeholder="e.g., 5,4,4,3,3"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-500"
+                required={type === 'PULLUP'}
+              />
+              <p className="text-xs text-slate-500 mt-1">Enter reps for each set, separated by commas</p>
+            </div>
+          )}
+
+          {type === 'PUSHUP' && (
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-1">
+                Push-up Sets (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={pushupSets}
+                onChange={(e) => setPushupSets(e.target.value)}
+                placeholder="e.g., 15,15,15,15,15"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-500"
+                required={type === 'PUSHUP'}
+              />
+              <p className="text-xs text-slate-500 mt-1">GTG: 5-10 sets throughout the day, 50-80% of max</p>
             </div>
           )}
 
