@@ -17,4 +17,11 @@ export async function initDb() {
       note TEXT
     );
   `;
+  
+  // Add rounds column if it doesn't exist (migration)
+  try {
+    await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS rounds INTEGER`;
+  } catch (error) {
+    // Column might already exist, ignore error
+  }
 }
