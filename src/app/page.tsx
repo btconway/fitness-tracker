@@ -2,6 +2,7 @@ import { sql } from '@/lib/db';
 import { ABF4FL_PROGRAM, getFighterPullupDay } from '@/lib/program';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { LogForm } from '@/components/LogForm';
+import { QuickLog } from '@/components/QuickLog';
 import { CheckCircle2, Circle, Trophy, Flame, TrendingUp, Target, Scale, Dumbbell } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -52,6 +53,33 @@ export default async function Dashboard() {
   const pullupStartDate = new Date('2026-02-10T00:00:00-06:00'); // Started 3RM Fighter on Feb 10
   const pullupDay = getFighterPullupDay(pullupStartDate, nowCST);
   const completedPullups = logs.filter(l => l.type === 'PULLUP').length;
+
+  // Today's sets for Quick Log
+  const todayDateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  const todayPushups = logs.filter(l => l.type === 'PUSHUP' && l.date === todayDateStr);
+  const todayPullups = logs.filter(l => l.type === 'PULLUP' && l.date === todayDateStr);
+  
+  const todaySets = [];
+  if (todayPushups.length > 0) {
+    const allSets = todayPushups.flatMap(log => 
+      log.pushup_sets ? log.pushup_sets.split(',').map((s: string) => parseInt(s.trim())) : []
+    );
+    todaySets.push({
+      type: 'PUSHUP',
+      sets: allSets,
+      total: allSets.reduce((a: number, b: number) => a + b, 0)
+    });
+  }
+  if (todayPullups.length > 0) {
+    const allSets = todayPullups.flatMap(log => 
+      log.pullup_sets ? log.pullup_sets.split(',').map((s: string) => parseInt(s.trim())) : []
+    );
+    todaySets.push({
+      type: 'PULLUP',
+      sets: allSets,
+      total: allSets.reduce((a: number, b: number) => a + b, 0)
+    });
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 p-8">
@@ -140,6 +168,8 @@ export default async function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        <QuickLog todaySets={todaySets} />
 
         <LogForm />
 
