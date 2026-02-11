@@ -1,6 +1,7 @@
 import { sql } from '@/lib/db';
 import { ABF4FL_PROGRAM } from '@/lib/program';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { LogForm } from '@/components/LogForm';
 import { CheckCircle2, Circle, Trophy, Flame, TrendingUp, Target } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -97,6 +98,8 @@ export default async function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        <LogForm />
 
         {/* Rounds Progress */}
         {recentRounds.length > 0 && (
