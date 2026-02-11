@@ -13,6 +13,7 @@ export async function initDb() {
       date DATE NOT NULL,
       type VARCHAR(50) NOT NULL,
       value TEXT NOT NULL,
+      rounds INTEGER,
       note TEXT
     );
   `;

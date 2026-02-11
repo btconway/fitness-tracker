@@ -4,10 +4,10 @@ import { sql, initDb } from '@/lib/db';
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    const { date, type, value, note } = data;
+    const { date, type, value, note, rounds } = data;
 
     await initDb();
-    await sql`INSERT INTO fitness_logs (date, type, value, note) VALUES (${date}, ${type}, ${value}, ${note})`;
+    await sql`INSERT INTO fitness_logs (date, type, value, rounds, note) VALUES (${date}, ${type}, ${value}, ${rounds || null}, ${note})`;
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

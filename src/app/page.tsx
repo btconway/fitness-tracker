@@ -1,12 +1,12 @@
 import { sql } from '@/lib/db';
 import { ABF4FL_PROGRAM } from '@/lib/program';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { CheckCircle2, Circle, Trophy, Flame } from 'lucide-react';
+import { CheckCircle2, Circle, Trophy, Flame, TrendingUp, Target } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Dashboard() {
-  const logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC`;
+  const logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC, created_at DESC`;
   
   const startDate = new Date('2026-02-10');
   const today = new Date();
@@ -17,100 +17,179 @@ export default async function Dashboard() {
 
   const completedWorkouts = logs.filter(l => l.type === 'WORKOUT' && l.value === 'COMPLETED').length;
   const totalSteps = logs.filter(l => l.type === 'STEPS').reduce((acc, curr) => acc + parseInt(curr.value), 0);
+  
+  // Calculate rounds stats
+  const workoutLogs = logs.filter(l => l.type === 'WORKOUT' && l.rounds);
+  const averageRounds = workoutLogs.length > 0 
+    ? (workoutLogs.reduce((acc, curr) => acc + (curr.rounds || 0), 0) / workoutLogs.length).toFixed(1)
+    : 0;
+  
+  // Get recent rounds for mini progress indicator
+  const recentRounds = workoutLogs.slice(0, 10).reverse();
+
+  // Calculate "as prescribed" percentage
+  const prescribedWorkouts = workoutLogs.filter(l => (l.rounds || 0) >= 5).length;
+  const prescribedPercentage = workoutLogs.length > 0 
+    ? Math.round((prescribedWorkouts / workoutLogs.length) * 100) 
+    : 0;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-8">
-      <header className="flex justify-between items-end">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight">Armor Building</h1>
-          <p className="text-muted-foreground text-lg">Dan John ABF4FL Tracker</p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Cycle Progress</p>
-          <p className="text-2xl font-mono">Day {currentDay + 1} / 28</p>
-        </div>
-      </header>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-primary text-primary-foreground">
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm font-medium opacity-80">Streak</p>
-                <p className="text-3xl font-bold">{completedWorkouts} Days</p>
-              </div>
-              <Flame size={40} className="opacity-50" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Steps</p>
-                <p className="text-3xl font-bold">{totalSteps.toLocaleString()}</p>
-              </div>
-              <Trophy size={40} className="text-yellow-500 opacity-50" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Workouts</p>
-                <p className="text-3xl font-bold">{completedWorkouts}</p>
-              </div>
-              <CheckCircle2 size={40} className="text-green-500 opacity-50" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="border-2 border-primary">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <span className="bg-primary text-primary-foreground px-2 py-1 rounded text-xs uppercase">Today</span>
-            {todaysPlan?.title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2 mb-4">
-            {todaysPlan?.exercises.map((ex, i) => (
-              <li key={i} className="flex justify-between border-b pb-1">
-                <span>{ex.name}</span>
-                <span className="font-mono font-bold text-primary">{ex.reps}</span>
-              </li>
-            ))}
-          </ul>
-          {todaysPlan?.carries && (
-            <div className="bg-muted p-3 rounded-md text-sm italic mb-4">
-              {todaysPlan.carries}
-            </div>
-          )}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Circle size={16} className="text-primary fill-primary" />
-            {todaysPlan?.notes}
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 p-8">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <header className="flex justify-between items-end">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-slate-800">Armor Building</h1>
+            <p className="text-slate-600 text-lg">Dan John ABF4FL Tracker</p>
           </div>
-        </CardContent>
-      </Card>
+          <div className="text-right">
+            <p className="text-sm font-medium uppercase tracking-wider text-slate-500">Cycle Progress</p>
+            <p className="text-2xl font-mono text-blue-600">Day {currentDay + 1} / 28</p>
+          </div>
+        </header>
 
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold">Recent Logs</h2>
-        <div className="bg-card border rounded-lg overflow-hidden">
-          {logs.slice(0, 5).map((log, i) => (
-            <div key={i} className="p-4 flex justify-between items-center border-b last:border-0">
-              <div>
-                <p className="font-bold uppercase text-xs text-muted-foreground">{log.type}</p>
-                <p>{log.note || log.value}</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white border-0 shadow-lg">
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium opacity-90">Streak</p>
+                  <p className="text-3xl font-bold">{completedWorkouts}</p>
+                  <p className="text-xs opacity-75 mt-1">days</p>
+                </div>
+                <Flame size={40} className="opacity-40" />
               </div>
-              <p className="text-sm font-mono text-muted-foreground">
-                {new Date(log.date).toLocaleDateString()}
-              </p>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border-blue-200 shadow-md">
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-slate-600">Total Steps</p>
+                  <p className="text-3xl font-bold text-slate-800">{totalSteps.toLocaleString()}</p>
+                </div>
+                <Trophy size={40} className="text-amber-400 opacity-40" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border-blue-200 shadow-md">
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-slate-600">Avg Rounds</p>
+                  <p className="text-3xl font-bold text-slate-800">{averageRounds}</p>
+                </div>
+                <TrendingUp size={40} className="text-emerald-500 opacity-40" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border-blue-200 shadow-md">
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-slate-600">As Prescribed</p>
+                  <p className="text-3xl font-bold text-slate-800">{prescribedPercentage}%</p>
+                </div>
+                <Target size={40} className="text-blue-500 opacity-40" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Rounds Progress */}
+        {recentRounds.length > 0 && (
+          <Card className="bg-white border-blue-200 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-slate-800 flex items-center gap-2">
+                <TrendingUp className="text-blue-600" size={20} />
+                Rounds Progress
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-end gap-2 h-32">
+                {recentRounds.map((log, i) => {
+                  const rounds = log.rounds || 0;
+                  const height = (rounds / 6) * 100; // Scale to 6 max rounds
+                  const color = rounds >= 5 ? 'bg-emerald-500' : rounds >= 3 ? 'bg-blue-500' : 'bg-amber-500';
+                  
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <div className={`w-full ${color} rounded-t-md transition-all`} style={{ height: `${height}%` }} />
+                      <span className="text-xs font-mono text-slate-600">{rounds}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 flex gap-4 text-xs text-slate-600">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-emerald-500 rounded" />
+                  <span>5+ rounds (prescribed)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-blue-500 rounded" />
+                  <span>3-4 rounds</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-amber-500 rounded" />
+                  <span>&lt;3 rounds</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card className="border-2 border-blue-400 bg-white shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+            <CardTitle className="flex items-center gap-2 text-slate-800">
+              <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs uppercase font-bold">Today</span>
+              {todaysPlan?.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <ul className="space-y-2 mb-4">
+              {todaysPlan?.exercises.map((ex, i) => (
+                <li key={i} className="flex justify-between border-b border-blue-100 pb-2">
+                  <span className="text-slate-700">{ex.name}</span>
+                  <span className="font-mono font-bold text-blue-600">{ex.reps}</span>
+                </li>
+              ))}
+            </ul>
+            {todaysPlan?.carries && (
+              <div className="bg-blue-50 border border-blue-200 p-3 rounded-md text-sm italic mb-4 text-slate-700">
+                {todaysPlan.carries}
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <Circle size={16} className="text-blue-500 fill-blue-500" />
+              {todaysPlan?.notes}
             </div>
-          ))}
+          </CardContent>
+        </Card>
+
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-slate-800">Recent Logs</h2>
+          <div className="bg-white border border-blue-200 rounded-lg overflow-hidden shadow-md">
+            {logs.slice(0, 10).map((log, i) => (
+              <div key={i} className="p-4 flex justify-between items-center border-b border-blue-100 last:border-0 hover:bg-blue-50 transition-colors">
+                <div className="flex-1">
+                  <p className="font-bold uppercase text-xs text-blue-600 mb-1">{log.type}</p>
+                  {log.rounds && (
+                    <p className="text-sm text-slate-700">
+                      <span className="font-semibold">{log.rounds} rounds</span>
+                      {log.rounds >= 5 ? ' ✓ As prescribed' : log.rounds >= 3 ? ' (Solid)' : ' (Keep building)'}
+                    </p>
+                  )}
+                  {log.note && <p className="text-sm text-slate-600 mt-1">{log.note}</p>}
+                  {log.type === 'STEPS' && <p className="text-sm text-slate-700">{parseInt(log.value).toLocaleString()} steps</p>}
+                </div>
+                <p className="text-sm font-mono text-slate-500 ml-4">
+                  {new Date(log.date).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
