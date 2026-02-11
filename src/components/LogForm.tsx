@@ -6,7 +6,12 @@ import { Plus } from 'lucide-react';
 
 export function LogForm({ onSuccess }: { onSuccess?: () => void }) {
   const [type, setType] = useState<'WORKOUT' | 'STEPS' | 'WEIGHT'>('WORKOUT');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  // Get current date in CST (YYYY-MM-DD format)
+  const now = new Date();
+  const cstDateStr = now.toLocaleDateString('en-US', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' });
+  const [month, day, year] = cstDateStr.split('/');
+  const dateInCST = `${year}-${month}-${day}`;
+  const [date, setDate] = useState(dateInCST);
   const [rounds, setRounds] = useState('');
   const [steps, setSteps] = useState('');
   const [weight, setWeight] = useState('');

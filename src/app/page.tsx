@@ -9,9 +9,14 @@ export const dynamic = 'force-dynamic';
 export default async function Dashboard() {
   const logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC, created_at DESC`;
   
-  const startDate = new Date('2026-02-10');
-  const today = new Date();
-  const diffTime = Math.abs(today.getTime() - startDate.getTime());
+  // Calculate current day in CST
+  const startDate = new Date('2026-02-10T00:00:00-06:00');
+  const nowUTC = new Date();
+  // Get CST date string (format: MM/DD/YYYY)
+  const cstDateStr = nowUTC.toLocaleDateString('en-US', { timeZone: 'America/Chicago' });
+  const [month, day, year] = cstDateStr.split('/');
+  const nowCST = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  const diffTime = Math.abs(nowCST.getTime() - startDate.getTime());
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   const currentDay = (diffDays % 28);
   const todaysPlan = ABF4FL_PROGRAM[currentDay];
