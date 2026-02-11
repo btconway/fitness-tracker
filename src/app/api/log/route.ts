@@ -17,12 +17,13 @@ export async function POST(req: NextRequest) {
     await sql`INSERT INTO fitness_logs (date, type, value, rounds, pullup_sets, pushup_sets, note) VALUES (${date}, ${type}, ${value}, ${rounds || null}, ${pullup_sets || null}, ${pushup_sets || null}, ${note})`;
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     if (!isDatabaseConfigured() || !sql) {
       return NextResponse.json(
@@ -31,10 +32,25 @@ export async function GET() {
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const month = searchParams.get('month');
+
+    if (month) {
+      const startDate = `${month}-01`;
+      const endDate = `${month}-31`;
+      const logs = await sql`
+        SELECT * FROM fitness_logs
+        WHERE date >= ${startDate} AND date <= ${endDate}
+        ORDER BY date DESC, created_at DESC
+      `;
+      return NextResponse.json(logs);
+    }
+
     const logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC, created_at DESC`;
     return NextResponse.json(logs);
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -56,8 +72,9 @@ export async function DELETE(req: NextRequest) {
 
     await sql`DELETE FROM fitness_logs WHERE id = ${id}`;
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -79,7 +96,8 @@ export async function PATCH(req: NextRequest) {
 
     await sql`UPDATE fitness_logs SET rounds = ${rounds || null}, note = ${note || null} WHERE id = ${id}`;
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

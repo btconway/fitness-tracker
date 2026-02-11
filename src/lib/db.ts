@@ -50,21 +50,21 @@ export async function initDb() {
     // Add rounds column if it doesn't exist (migration)
     try {
       await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS rounds INTEGER`;
-    } catch (error) {
+    } catch {
       // Column might already exist, ignore error
     }
     
     // Add pullup_sets column if it doesn't exist (migration)
     try {
       await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS pullup_sets TEXT`;
-    } catch (error) {
+    } catch {
       // Column might already exist, ignore error
     }
     
     // Add pushup_sets column if it doesn't exist (migration)
     try {
       await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS pushup_sets TEXT`;
-    } catch (error) {
+    } catch {
       // Column might already exist, ignore error
     }
   } catch (error) {
