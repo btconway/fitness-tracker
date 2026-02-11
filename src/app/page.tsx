@@ -130,6 +130,47 @@ export default async function Dashboard() {
 
         <LogForm />
 
+        {/* Weight Progress */}
+        {weightLogs.length > 0 && (
+          <Card className="bg-white border-blue-200 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-slate-800 flex items-center gap-2">
+                <Scale className="text-purple-600" size={20} />
+                Weight Progress
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-end gap-2 h-32">
+                {weightLogs.slice(0, 10).reverse().map((log, i) => {
+                  const weight = parseFloat(log.value);
+                  const minWeight = Math.min(...weightLogs.map(l => parseFloat(l.value)));
+                  const maxWeight = Math.max(...weightLogs.map(l => parseFloat(l.value)));
+                  const range = maxWeight - minWeight || 10; // Default range if all same
+                  const height = ((weight - minWeight) / range) * 80 + 20; // 20-100% scale
+                  
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <div 
+                        className="w-full bg-purple-500 rounded-t-md transition-all" 
+                        style={{ height: `${height}%` }} 
+                      />
+                      <span className="text-xs font-mono text-slate-600">{weight.toFixed(1)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              {weightChange && (
+                <div className="mt-4 text-sm text-slate-600">
+                  <span className="font-semibold">
+                    {parseFloat(weightChange) > 0 ? '▲' : '▼'} {Math.abs(parseFloat(weightChange))} lbs
+                  </span>
+                  {' '}since start
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Rounds Progress */}
         {recentRounds.length > 0 && (
           <Card className="bg-white border-blue-200 shadow-md">
