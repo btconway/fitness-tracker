@@ -3,16 +3,10 @@ import { ABF4FL_PROGRAM } from '@/lib/program';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { CheckCircle2, Circle, Trophy, Flame } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Dashboard() {
-  let logs: any[] = [];
-  
-  try {
-    if (process.env.DATABASE_URL) {
-      logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC`;
-    }
-  } catch (error) {
-    console.error('Failed to fetch logs:', error);
-  }
+  const logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC`;
   
   const startDate = new Date('2026-02-10');
   const today = new Date();
