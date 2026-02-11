@@ -101,3 +101,79 @@ export function getPlanForDate(startDate: Date, targetDate: Date) {
   // Logic to return specific Week 4 variation if cycleDay > 21
   return cycleDay;
 }
+
+// Fighter Pullup Program types
+export interface PullupDay {
+  day: number;
+  sets: number[];
+  rest: boolean;
+}
+
+// 3RM Fighter Pullup Program (Days 1-12)
+export const FIGHTER_3RM: PullupDay[] = [
+  { day: 1, sets: [3, 2, 1, 1], rest: false },
+  { day: 2, sets: [3, 2, 1, 1], rest: false },
+  { day: 3, sets: [3, 2, 2, 1], rest: false },
+  { day: 4, sets: [3, 3, 2, 1], rest: false },
+  { day: 5, sets: [4, 3, 2, 1], rest: false },
+  { day: 6, sets: [], rest: true },
+  { day: 7, sets: [4, 3, 2, 1, 1], rest: false },
+  { day: 8, sets: [4, 3, 2, 2, 1], rest: false },
+  { day: 9, sets: [4, 3, 3, 2, 1], rest: false },
+  { day: 10, sets: [4, 4, 3, 2, 1], rest: false },
+  { day: 11, sets: [5, 4, 3, 2, 1], rest: false },
+  { day: 12, sets: [], rest: true }
+];
+
+// 5RM Fighter Pullup Program (Days 1-30)
+export const FIGHTER_5RM: PullupDay[] = [
+  { day: 1, sets: [5, 4, 3, 2, 1], rest: false },
+  { day: 2, sets: [5, 4, 3, 2, 2], rest: false },
+  { day: 3, sets: [5, 4, 3, 3, 2], rest: false },
+  { day: 4, sets: [5, 4, 4, 3, 2], rest: false },
+  { day: 5, sets: [5, 5, 4, 3, 2], rest: false },
+  { day: 6, sets: [], rest: true },
+  { day: 7, sets: [6, 5, 4, 3, 2], rest: false },
+  { day: 8, sets: [6, 5, 4, 3, 3], rest: false },
+  { day: 9, sets: [6, 5, 4, 4, 3], rest: false },
+  { day: 10, sets: [6, 5, 5, 4, 3], rest: false },
+  { day: 11, sets: [6, 6, 5, 4, 3], rest: false },
+  { day: 12, sets: [], rest: true },
+  { day: 13, sets: [7, 6, 5, 4, 3], rest: false },
+  { day: 14, sets: [7, 6, 5, 4, 4], rest: false },
+  { day: 15, sets: [7, 6, 5, 5, 4], rest: false },
+  { day: 16, sets: [7, 6, 6, 5, 4], rest: false },
+  { day: 17, sets: [7, 7, 6, 5, 4], rest: false },
+  { day: 18, sets: [], rest: true },
+  { day: 19, sets: [8, 7, 6, 5, 4], rest: false },
+  { day: 20, sets: [8, 7, 6, 5, 5], rest: false },
+  { day: 21, sets: [8, 7, 6, 6, 5], rest: false },
+  { day: 22, sets: [8, 7, 7, 6, 5], rest: false },
+  { day: 23, sets: [8, 8, 7, 6, 5], rest: false },
+  { day: 24, sets: [], rest: true },
+  { day: 25, sets: [9, 8, 7, 6, 5], rest: false },
+  { day: 26, sets: [9, 8, 7, 6, 6], rest: false },
+  { day: 27, sets: [9, 8, 7, 7, 6], rest: false },
+  { day: 28, sets: [9, 8, 8, 7, 6], rest: false },
+  { day: 29, sets: [9, 9, 8, 7, 6], rest: false },
+  { day: 30, sets: [], rest: true }
+];
+
+export function getFighterPullupDay(startDate: Date, targetDate: Date) {
+  const diffTime = Math.abs(targetDate.getTime() - startDate.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; // Day 1 = start date
+  
+  // Days 1-12: 3RM program
+  if (diffDays <= 12) {
+    return { program: '3RM', ...FIGHTER_3RM[diffDays - 1] };
+  }
+  
+  // Days 13+: 5RM program (reset to day 1 of 5RM after 3RM completes)
+  const fiveRMDay = diffDays - 12;
+  if (fiveRMDay <= 30) {
+    return { program: '5RM', ...FIGHTER_5RM[fiveRMDay - 1] };
+  }
+  
+  // After completing both programs (42 days total), suggest retest
+  return { program: 'RETEST', day: diffDays, sets: [], rest: true };
+}
