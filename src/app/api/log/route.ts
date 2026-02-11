@@ -23,3 +23,35 @@ export async function GET() {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Missing id parameter' }, { status: 400 });
+    }
+
+    await sql`DELETE FROM fitness_logs WHERE id = ${id}`;
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const data = await req.json();
+    const { id, rounds, note } = data;
+    
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Missing id parameter' }, { status: 400 });
+    }
+
+    await sql`UPDATE fitness_logs SET rounds = ${rounds || null}, note = ${note || null} WHERE id = ${id}`;
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
