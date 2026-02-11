@@ -7,10 +7,7 @@ export async function POST(req: NextRequest) {
     const { date, type, value, note } = data;
 
     await initDb();
-    await sql(
-      'INSERT INTO fitness_logs (date, type, value, note) VALUES ($1, $2, $3, $4)',
-      [date, type, value, note]
-    );
+    await sql`INSERT INTO fitness_logs (date, type, value, note) VALUES (${date}, ${type}, ${value}, ${note})`;
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
@@ -20,7 +17,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const logs = await sql('SELECT * FROM fitness_logs ORDER BY date DESC, created_at DESC');
+    const logs = await sql`SELECT * FROM fitness_logs ORDER BY date DESC, created_at DESC`;
     return NextResponse.json(logs);
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

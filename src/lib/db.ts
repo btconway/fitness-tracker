@@ -1,13 +1,12 @@
 import { neon } from '@neondatabase/serverless';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is not set');
-}
+// During build time, DATABASE_URL might not be set
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/fitness_tracker';
 
-export const sql = neon(process.env.DATABASE_URL);
+export const sql = neon(DATABASE_URL);
 
 export async function initDb() {
-  await sql(`
+  await sql`
     CREATE TABLE IF NOT EXISTS fitness_logs (
       id SERIAL PRIMARY KEY,
       created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -16,5 +15,5 @@ export async function initDb() {
       value TEXT NOT NULL,
       note TEXT
     );
-  `);
+  `;
 }
