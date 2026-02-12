@@ -2,7 +2,7 @@ import { getTodayContext } from '@/lib/data';
 import { TodayWorkout } from '@/components/today/TodayWorkout';
 import { FighterPullup } from '@/components/today/FighterPullup';
 import { FighterPushup } from '@/components/today/FighterPushup';
-import { QuickLog } from '@/components/today/QuickLog';
+
 import { StepsLogger } from '@/components/today/StepsLogger';
 import { TodayProgress } from '@/components/today/TodayProgress';
 import { LogSheet } from '@/components/logging/LogSheet';
@@ -64,8 +64,6 @@ export default async function TodayPage() {
         todaySets={todayPushupSets}
         todayTotal={todayPushupTotal}
       />
-
-      <QuickLog todayStr={todayStr} todayTotal={todayPushupTotal} />
 
       <StepsLogger
         todayStr={todayStr}
