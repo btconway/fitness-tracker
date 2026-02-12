@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import { getCompletedSetIndices } from '@/lib/utils';
 
-interface PullupDayInfo {
+interface PushupDayInfo {
   program: string;
   day: number;
   sets: number[];
@@ -13,18 +13,18 @@ interface PullupDayInfo {
 }
 
 interface Props {
-  pullupDay: PullupDayInfo;
+  pushupDay: PushupDayInfo;
   todayStr: string;
   todaySets: number[];
   todayTotal: number;
 }
 
-export function FighterPullup({ pullupDay, todayStr, todaySets, todayTotal }: Props) {
+export function FighterPushup({ pushupDay, todayStr, todaySets, todayTotal }: Props) {
   const router = useRouter();
   const [isLogging, setIsLogging] = useState(false);
 
-  const completedIndices = getCompletedSetIndices(pullupDay.sets, todaySets);
-  const allDone = pullupDay.sets.length > 0 && completedIndices.size === pullupDay.sets.length;
+  const completedIndices = getCompletedSetIndices(pushupDay.sets, todaySets);
+  const allDone = pushupDay.sets.length > 0 && completedIndices.size === pushupDay.sets.length;
   const completedReps = todaySets.reduce((a, b) => a + b, 0);
 
   async function handleLogSet(reps: number) {
@@ -36,16 +36,16 @@ export function FighterPullup({ pullupDay, todayStr, todaySets, todayTotal }: Pr
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           date: todayStr,
-          type: 'PULLUP',
+          type: 'PUSHUP',
           value: String(reps),
-          pullup_sets: String(reps),
-          note: `Fighter ${pullupDay.program} Day ${pullupDay.day}`,
+          pushup_sets: String(reps),
+          note: `Fighter Push-ups ${pushupDay.program} Day ${pushupDay.day}`,
         }),
       });
       if (res.ok) router.refresh();
-      else alert('Failed to log pullups');
+      else alert('Failed to log push-ups');
     } catch {
-      alert('Error logging pullups');
+      alert('Error logging push-ups');
     } finally {
       setIsLogging(false);
     }
@@ -55,35 +55,35 @@ export function FighterPullup({ pullupDay, todayStr, todaySets, todayTotal }: Pr
     if (isLogging) return;
     setIsLogging(true);
     try {
-      const remainingSets = pullupDay.sets.filter((_, i) => !completedIndices.has(i));
+      const remainingSets = pushupDay.sets.filter((_, i) => !completedIndices.has(i));
       const setsStr = remainingSets.join(',');
       const res = await fetch('/api/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           date: todayStr,
-          type: 'PULLUP',
+          type: 'PUSHUP',
           value: setsStr,
-          pullup_sets: setsStr,
-          note: `Fighter ${pullupDay.program} Day ${pullupDay.day}`,
+          pushup_sets: setsStr,
+          note: `Fighter Push-ups ${pushupDay.program} Day ${pushupDay.day}`,
         }),
       });
       if (res.ok) router.refresh();
-      else alert('Failed to log pullups');
+      else alert('Failed to log push-ups');
     } catch {
-      alert('Error logging pullups');
+      alert('Error logging push-ups');
     } finally {
       setIsLogging(false);
     }
   }
 
-  if (pullupDay.rest) {
+  if (pushupDay.rest) {
     return (
-      <div className="bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-400 p-4">
+      <div className="bg-white rounded-xl border border-zinc-200 border-l-4 border-l-emerald-400 p-4">
         <div className="flex items-center justify-between mb-1">
-          <h3 className="font-semibold text-slate-800 text-sm">Fighter Pullups</h3>
+          <h3 className="font-semibold text-slate-800 text-sm">Fighter Push-ups (GTG)</h3>
           <span className="text-xs text-slate-500 bg-zinc-100 px-2 py-0.5 rounded-full">
-            {pullupDay.program} Day {pullupDay.day}
+            {pushupDay.program} Day {pushupDay.day}
           </span>
         </div>
         <p className="text-slate-500 text-sm">Rest day — recover and rebuild.</p>
@@ -91,31 +91,22 @@ export function FighterPullup({ pullupDay, todayStr, todaySets, todayTotal }: Pr
     );
   }
 
-  if (pullupDay.program === 'RETEST') {
-    return (
-      <div className="bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-400 p-4">
-        <h3 className="font-semibold text-slate-800 text-sm mb-1">Fighter Pullups — Retest</h3>
-        <p className="text-slate-600 text-sm">Programs complete. Take 2-3 days off, then test your max.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-white rounded-xl border border-zinc-200 border-l-4 border-l-indigo-400 p-4 relative">
+    <div className="bg-white rounded-xl border border-zinc-200 border-l-4 border-l-emerald-400 p-4 relative">
       {allDone && (
         <div className="absolute top-3 right-3">
           <CheckCircle2 size={24} className="text-emerald-500" />
         </div>
       )}
       <div className={`flex items-center justify-between mb-3 ${allDone ? 'pr-9' : ''}`}>
-        <h3 className="font-semibold text-slate-800 text-sm">Fighter Pullups</h3>
+        <h3 className="font-semibold text-slate-800 text-sm">Fighter Push-ups (GTG)</h3>
         <span className="text-xs text-slate-500 bg-zinc-100 px-2 py-0.5 rounded-full">
-          {pullupDay.program} Day {pullupDay.day}
+          {pushupDay.program} Day {pushupDay.day}
         </span>
       </div>
 
       <div className="flex gap-2 mb-3">
-        {pullupDay.sets.map((reps, i) => {
+        {pushupDay.sets.map((reps, i) => {
           const done = completedIndices.has(i);
           return (
             <button
@@ -125,13 +116,13 @@ export function FighterPullup({ pullupDay, todayStr, todaySets, todayTotal }: Pr
               className={`flex-1 rounded-lg py-3 transition-colors ${
                 done
                   ? 'bg-emerald-50 border border-emerald-300'
-                  : 'bg-indigo-50 border border-indigo-200 active:bg-indigo-100'
+                  : 'bg-emerald-50 border border-emerald-200 active:bg-emerald-100'
               } disabled:opacity-70`}
             >
-              <div className={`text-2xl font-bold ${done ? 'text-emerald-600' : 'text-indigo-600'}`}>
+              <div className={`text-2xl font-bold ${done ? 'text-emerald-600' : 'text-emerald-700'}`}>
                 {reps}
               </div>
-              <div className={`text-[10px] mt-0.5 ${done ? 'text-emerald-500 font-medium' : 'text-indigo-400'}`}>
+              <div className={`text-[10px] mt-0.5 ${done ? 'text-emerald-500 font-medium' : 'text-emerald-400'}`}>
                 {done ? 'Done' : `Set ${i + 1}`}
               </div>
             </button>
@@ -141,8 +132,8 @@ export function FighterPullup({ pullupDay, todayStr, todaySets, todayTotal }: Pr
 
       {/* Progress text */}
       {todaySets.length > 0 && !allDone && (
-        <p className="text-xs text-indigo-600 font-medium text-center mb-2">
-          {completedIndices.size}/{pullupDay.sets.length} sets done ({completedReps} reps)
+        <p className="text-xs text-emerald-600 font-medium text-center mb-2">
+          {completedIndices.size}/{pushupDay.sets.length} sets done ({completedReps} reps)
         </p>
       )}
 
@@ -154,7 +145,7 @@ export function FighterPullup({ pullupDay, todayStr, todaySets, todayTotal }: Pr
         <button
           onClick={handleLogRemaining}
           disabled={isLogging}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40"
         >
           {isLogging ? 'Logging...' : completedIndices.size > 0 ? 'Log Remaining Sets' : 'Log All Sets'}
         </button>

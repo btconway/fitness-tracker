@@ -15,7 +15,20 @@ export interface DayPlan {
   stepsGoal: number;
   notes: string;
   roundsRange?: [number, number];
+  warmup?: string[];
+  cooldown?: string[];
+  detailedNotes?: string;
 }
+
+const STANDARD_WARMUP = [
+  'Hang from bar (30-60s)',
+  'Deep goblet squat sit (2-3 min)',
+  'Short brisk walk (5 min)',
+];
+
+const STANDARD_COOLDOWN = [
+  'Cool down walk: 15-30 minutes',
+];
 
 // ---- WEEKS 1-3 BASE TEMPLATE (7-day pattern) ----
 const WEEK_BASE: Omit<DayPlan, 'dayNumber'>[] = [
@@ -31,13 +44,16 @@ const WEEK_BASE: Omit<DayPlan, 'dayNumber'>[] = [
     stepsGoal: 10000,
     notes: 'Focus on form.',
     roundsRange: [3, 5],
+    warmup: STANDARD_WARMUP,
+    cooldown: STANDARD_COOLDOWN,
   },
   {
     type: 'WALK_MOVEMENT',
     title: 'Walk + Movement Only',
     exercises: [],
     stepsGoal: 10000,
-    notes: '45-60 min walk, ideally fasted. Mobility: Original Strength/foam rolling.',
+    notes: '45-60 min walk, ideally fasted.',
+    detailedNotes: '45-60 min walk, ideally fasted. Mobility: Original Strength resets, foam rolling, or yoga. Focus on nasal breathing.',
   },
   {
     type: 'AB_COMPLEX',
@@ -51,6 +67,8 @@ const WEEK_BASE: Omit<DayPlan, 'dayNumber'>[] = [
     stepsGoal: 10000,
     notes: 'Build volume.',
     roundsRange: [5, 10],
+    warmup: STANDARD_WARMUP,
+    cooldown: STANDARD_COOLDOWN,
   },
   {
     type: 'RUCK',
@@ -58,6 +76,7 @@ const WEEK_BASE: Omit<DayPlan, 'dayNumber'>[] = [
     exercises: [],
     stepsGoal: 10000,
     notes: '30-45 min ruck (5-30 lbs). Focus on posture.',
+    detailedNotes: '30-45 min ruck with 5-30 lbs. Focus on upright posture and brisk pace. Great for GPP and mental toughness.',
   },
   {
     type: 'AB_COMPLEX',
@@ -71,6 +90,8 @@ const WEEK_BASE: Omit<DayPlan, 'dayNumber'>[] = [
     stepsGoal: 10000,
     notes: 'Push the pace.',
     roundsRange: [5, 10],
+    warmup: STANDARD_WARMUP,
+    cooldown: STANDARD_COOLDOWN,
   },
   {
     type: 'RECOVERY',
@@ -78,6 +99,7 @@ const WEEK_BASE: Omit<DayPlan, 'dayNumber'>[] = [
     exercises: [],
     stepsGoal: 10000,
     notes: 'Active recovery or total off day. Get the steps.',
+    detailedNotes: 'Active recovery: easy walk, mobility, or total off day. Prioritize sleep and nutrition. Get the steps in.',
   },
   {
     type: 'RECOVERY',
@@ -85,6 +107,7 @@ const WEEK_BASE: Omit<DayPlan, 'dayNumber'>[] = [
     exercises: [],
     stepsGoal: 10000,
     notes: 'Reflect: Did I walk? Did I train? Did I eat like an adult?',
+    detailedNotes: 'Weekly reflection: Did I walk every day? Did I train when scheduled? Did I eat like an adult? Adjust next week accordingly.',
   },
 ];
 
@@ -100,13 +123,16 @@ const WEEK4_TEMPLATE: Omit<DayPlan, 'dayNumber'>[] = [
     stepsGoal: 10000,
     notes: 'Press ladder: 2, 3, 5, 10 reps. Repeat up to 3x.',
     roundsRange: [1, 3],
+    warmup: STANDARD_WARMUP,
+    cooldown: STANDARD_COOLDOWN,
   },
   {
     type: 'WALK_MOVEMENT',
     title: 'Walk + Movement Only',
     exercises: [],
     stepsGoal: 10000,
-    notes: '45-60 min walk, ideally fasted. Mobility: Original Strength/foam rolling.',
+    notes: '45-60 min walk, ideally fasted.',
+    detailedNotes: '45-60 min walk, ideally fasted. Mobility: Original Strength resets, foam rolling, or yoga. Focus on nasal breathing.',
   },
   {
     type: 'AB_COMPLEX',
@@ -120,6 +146,8 @@ const WEEK4_TEMPLATE: Omit<DayPlan, 'dayNumber'>[] = [
     stepsGoal: 10000,
     notes: 'High volume day. Push for max rounds.',
     roundsRange: [10, 30],
+    warmup: STANDARD_WARMUP,
+    cooldown: STANDARD_COOLDOWN,
   },
   {
     type: 'RUCK',
@@ -127,6 +155,7 @@ const WEEK4_TEMPLATE: Omit<DayPlan, 'dayNumber'>[] = [
     exercises: [],
     stepsGoal: 10000,
     notes: '30-45 min ruck (5-30 lbs). Focus on posture.',
+    detailedNotes: '30-45 min ruck with 5-30 lbs. Focus on upright posture and brisk pace. Great for GPP and mental toughness.',
   },
   {
     type: 'HYPERTROPHY_PRESS',
@@ -138,6 +167,8 @@ const WEEK4_TEMPLATE: Omit<DayPlan, 'dayNumber'>[] = [
     stepsGoal: 10000,
     notes: 'Press ladder: 2, 3, 5, 10 reps. Repeat up to 5x.',
     roundsRange: [1, 5],
+    warmup: STANDARD_WARMUP,
+    cooldown: STANDARD_COOLDOWN,
   },
   {
     type: 'RECOVERY',
@@ -145,6 +176,7 @@ const WEEK4_TEMPLATE: Omit<DayPlan, 'dayNumber'>[] = [
     exercises: [],
     stepsGoal: 10000,
     notes: 'Active recovery or total off day. Get the steps.',
+    detailedNotes: 'Active recovery: easy walk, mobility, or total off day. Prioritize sleep and nutrition. Get the steps in.',
   },
   {
     type: 'RECOVERY',
@@ -152,6 +184,7 @@ const WEEK4_TEMPLATE: Omit<DayPlan, 'dayNumber'>[] = [
     exercises: [],
     stepsGoal: 10000,
     notes: 'Reflect: Did I walk? Did I train? Did I eat like an adult?',
+    detailedNotes: 'Weekly reflection: Did I walk every day? Did I train when scheduled? Did I eat like an adult? Adjust next week accordingly.',
   },
 ];
 
@@ -246,4 +279,66 @@ export function getFighterPullupDay(startDate: Date, targetDate: Date) {
   }
 
   return { program: 'RETEST' as const, day: diffDays, sets: [] as number[], rest: true };
+}
+
+// ---- Fighter Push-up Program (GTG) ----
+
+export interface PushupDay {
+  day: number;
+  sets: number[];
+  rest: boolean;
+}
+
+// Phase 1 (days 1-12): 4 sets ramping from ~45 to ~75 total reps
+export const PUSHUP_GTG_PHASE1: PushupDay[] = [
+  { day: 1, sets: [15, 12, 10, 8], rest: false },
+  { day: 2, sets: [15, 12, 10, 10], rest: false },
+  { day: 3, sets: [15, 13, 12, 10], rest: false },
+  { day: 4, sets: [16, 14, 12, 10], rest: false },
+  { day: 5, sets: [18, 15, 12, 10], rest: false },
+  { day: 6, sets: [], rest: true },
+  { day: 7, sets: [18, 15, 12, 10, 8], rest: false },
+  { day: 8, sets: [18, 15, 13, 10, 8], rest: false },
+  { day: 9, sets: [18, 16, 14, 12, 8], rest: false },
+  { day: 10, sets: [20, 16, 14, 12, 10], rest: false },
+  { day: 11, sets: [20, 18, 15, 12, 10], rest: false },
+  { day: 12, sets: [], rest: true },
+];
+
+// Phase 2 (days 13-30): 5 sets ramping from ~75 to ~110 total reps
+export const PUSHUP_GTG_PHASE2: PushupDay[] = [
+  { day: 1, sets: [20, 18, 15, 12, 10], rest: false },
+  { day: 2, sets: [20, 18, 15, 12, 12], rest: false },
+  { day: 3, sets: [20, 18, 16, 14, 12], rest: false },
+  { day: 4, sets: [22, 20, 16, 14, 12], rest: false },
+  { day: 5, sets: [22, 20, 18, 15, 12], rest: false },
+  { day: 6, sets: [], rest: true },
+  { day: 7, sets: [24, 20, 18, 15, 12], rest: false },
+  { day: 8, sets: [24, 22, 18, 15, 12], rest: false },
+  { day: 9, sets: [24, 22, 20, 16, 14], rest: false },
+  { day: 10, sets: [25, 22, 20, 18, 14], rest: false },
+  { day: 11, sets: [25, 22, 20, 18, 15], rest: false },
+  { day: 12, sets: [], rest: true },
+  { day: 13, sets: [25, 22, 20, 18, 16], rest: false },
+  { day: 14, sets: [25, 24, 20, 18, 16], rest: false },
+  { day: 15, sets: [25, 24, 22, 20, 16], rest: false },
+  { day: 16, sets: [28, 24, 22, 20, 16], rest: false },
+  { day: 17, sets: [28, 25, 22, 20, 18], rest: false },
+  { day: 18, sets: [], rest: true },
+];
+
+export function getFighterPushupDay(startDate: Date, targetDate: Date) {
+  const diffTime = Math.abs(targetDate.getTime() - startDate.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+  if (diffDays <= 12) {
+    return { program: 'Phase 1' as const, ...PUSHUP_GTG_PHASE1[diffDays - 1] };
+  }
+
+  const phase2Day = diffDays - 12;
+  if (phase2Day <= 18) {
+    return { program: 'Phase 2' as const, ...PUSHUP_GTG_PHASE2[phase2Day - 1] };
+  }
+
+  return { program: 'MAINTAIN' as const, day: diffDays, sets: [25, 22, 20, 18, 15] as number[], rest: false };
 }

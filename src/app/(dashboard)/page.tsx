@@ -1,6 +1,7 @@
 import { getTodayContext } from '@/lib/data';
 import { TodayWorkout } from '@/components/today/TodayWorkout';
 import { FighterPullup } from '@/components/today/FighterPullup';
+import { FighterPushup } from '@/components/today/FighterPushup';
 import { QuickLog } from '@/components/today/QuickLog';
 import { StepsLogger } from '@/components/today/StepsLogger';
 import { TodayProgress } from '@/components/today/TodayProgress';
@@ -23,11 +24,13 @@ export default async function TodayPage() {
     todayStr,
     plan,
     pullupDay,
+    pushupDay,
     todayWorkout,
     todaySteps,
     todayWeight,
     todayPullupSets,
     todayPullupTotal,
+    todayPushupSets,
     todayPushupTotal,
     lastWeight,
   } = ctx;
@@ -53,6 +56,13 @@ export default async function TodayPage() {
         todayStr={todayStr}
         todaySets={todayPullupSets}
         todayTotal={todayPullupTotal}
+      />
+
+      <FighterPushup
+        pushupDay={pushupDay}
+        todayStr={todayStr}
+        todaySets={todayPushupSets}
+        todayTotal={todayPushupTotal}
       />
 
       <QuickLog todayStr={todayStr} todayTotal={todayPushupTotal} />

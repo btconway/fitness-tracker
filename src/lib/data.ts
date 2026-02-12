@@ -1,6 +1,6 @@
 import { sql, isDatabaseConfigured } from '@/lib/db';
 import { serializeDate, serializeTimestamp, getTodayCST, getNowCST, getCycleDay, PROGRAM_START } from '@/lib/date';
-import { getFullPlanForDay, getFighterPullupDay } from '@/lib/program';
+import { getFullPlanForDay, getFighterPullupDay, getFighterPushupDay } from '@/lib/program';
 import type { FitnessLog } from '@/lib/types';
 
 /** Fetch all logs, serialized and sorted by date DESC */
@@ -45,6 +45,7 @@ export async function getTodayContext() {
   const cycleDay = getCycleDay(nowCST);
   const plan = getFullPlanForDay(cycleDay);
   const pullupDay = getFighterPullupDay(PROGRAM_START, nowCST);
+  const pushupDay = getFighterPushupDay(PROGRAM_START, nowCST);
 
   const todayLogs = logs.filter(l => l.date === todayStr);
   const todayWorkout = todayLogs.find(l => l.type === 'WORKOUT');
@@ -72,6 +73,7 @@ export async function getTodayContext() {
     cycleDay,
     plan,
     pullupDay,
+    pushupDay,
     todayWorkout,
     todaySteps,
     todayWeight,
