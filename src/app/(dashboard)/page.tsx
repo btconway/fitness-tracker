@@ -35,14 +35,30 @@ export default async function TodayPage() {
     lastWeight,
   } = ctx;
 
+  // Compute tri-state completion for pullups/pushups
+  function getSetStatus(prescribedSets: number[], loggedSets: number[]): 'none' | 'partial' | 'done' {
+    if (prescribedSets.length === 0) return 'done'; // rest day or no program
+    if (loggedSets.length === 0) return 'none';
+    // Check if all prescribed sets are matched
+    const remaining = [...prescribedSets];
+    for (const logged of loggedSets) {
+      const idx = remaining.indexOf(logged);
+      if (idx !== -1) remaining.splice(idx, 1);
+    }
+    return remaining.length === 0 ? 'done' : 'partial';
+  }
+
+  const pullupStatus = pullupDay.rest ? 'done' : getSetStatus(pullupDay.sets, todayPullupSets);
+  const pushupStatus = pushupDay.rest ? 'done' : getSetStatus(pushupDay.sets, todayPushupSets);
+
   return (
     <div className="space-y-3">
       <TodayProgress
-        workout={!!todayWorkout}
-        steps={!!todaySteps}
-        pullups={todayPullupSets.length > 0}
-        pushups={todayPushupTotal > 0}
-        weight={!!todayWeight}
+        workout={!!todayWorkout ? 'done' : 'none'}
+        steps={!!todaySteps ? 'done' : 'none'}
+        pullups={pullupStatus}
+        pushups={pushupStatus}
+        weight={!!todayWeight ? 'done' : 'none'}
       />
 
       <TodayWorkout
