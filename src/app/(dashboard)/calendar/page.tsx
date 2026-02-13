@@ -1,6 +1,6 @@
 import { fetchLogsByMonth } from '@/lib/data';
 import { getTodayCST, getYearMonth } from '@/lib/date';
-import { CalendarGrid } from '@/components/calendar/CalendarGrid';
+import { CalendarView } from '@/components/calendar/CalendarView';
 import type { FitnessLog } from '@/lib/types';
 
 export default async function CalendarPage() {
@@ -16,7 +16,7 @@ export default async function CalendarPage() {
 
   return (
     <div>
-      <CalendarGrid
+      <CalendarView
         initialMonth={currentMonth}
         initialLogs={logs}
         todayStr={todayStr}

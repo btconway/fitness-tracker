@@ -46,6 +46,34 @@ export function getLinearDay(date?: Date): number {
   return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 }
 
+/** Format a Date object as YYYY-MM-DD */
+export function formatDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/** Get Monday of the week containing a given date string (YYYY-MM-DD) */
+export function getWeekStart(dateStr: string): string {
+  const d = new Date(`${dateStr}T12:00:00-06:00`);
+  const dow = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  const diff = dow === 0 ? 6 : dow - 1;
+  d.setDate(d.getDate() - diff);
+  return formatDate(d);
+}
+
+/** Get 7 date strings (Mon-Sun) starting from a week start */
+export function getWeekDates(weekStart: string): string[] {
+  const dates: string[] = [];
+  const d = new Date(`${weekStart}T12:00:00-06:00`);
+  for (let i = 0; i < 7; i++) {
+    dates.push(formatDate(d));
+    d.setDate(d.getDate() + 1);
+  }
+  return dates;
+}
+
 /** Get YYYY-MM for a date string */
 export function getYearMonth(dateStr: string): string {
   return dateStr.substring(0, 7);
