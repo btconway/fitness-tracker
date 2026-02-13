@@ -19,13 +19,16 @@ export function getNowCST(): Date {
   return new Date(`${today}T00:00:00-06:00`);
 }
 
-/** Program start date: Feb 10, 2026 */
+/** Program start date: Feb 10, 2026 (used for Fighter Pullup/Pushup programs) */
 export const PROGRAM_START = new Date('2026-02-10T00:00:00-06:00');
+
+/** ABC cycle start: Feb 9, 2026 (Monday) — aligns weeks to Mon-Sun */
+export const ABC_PROGRAM_START = new Date('2026-02-09T00:00:00-06:00');
 
 /** Calculate the 1-indexed cycle day (1-28) for a given CST date */
 export function getCycleDay(date?: Date): number {
   const target = date ?? getNowCST();
-  const diffTime = Math.abs(target.getTime() - PROGRAM_START.getTime());
+  const diffTime = Math.abs(target.getTime() - ABC_PROGRAM_START.getTime());
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   return (diffDays % 28) + 1;
 }
