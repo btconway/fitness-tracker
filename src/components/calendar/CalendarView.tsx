@@ -13,7 +13,7 @@ import type { DayInfo, DayStatus, Status } from './types';
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-const PROGRAM_START_STR = '2026-02-10';
+const PROGRAM_START_STR = '2026-02-12';
 
 const TYPE_STYLES: Record<string, { border: string; bg: string; text: string; label: string }> = {
   AB_COMPLEX: { border: 'border-l-blue-500', bg: 'bg-blue-50', text: 'text-blue-700', label: 'AB' },

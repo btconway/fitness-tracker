@@ -46,7 +46,7 @@ Raw SQL via `@neondatabase/serverless` (no ORM). Single `fitness_logs` table wit
 
 - **Server vs client components:** Default to server components. Only use `'use client'` when React hooks or browser APIs are needed.
 - **Date handling:** All date math uses CST (America/Chicago) via utilities in `src/lib/date.ts`. Dates stored as `YYYY-MM-DD` strings in the DB. Always serialize Date objects to strings before returning from server components to prevent React hydration errors.
-- **Program day calculation:** Day 1 = Feb 10, 2026. The ABF4FL program cycles every 28 days (Weeks 1-3 base, Week 4 hypertrophy). The Fighter Pullup Program runs linearly: days 1-12 = 3RM phase, days 13-42 = 5RM phase, then retest.
+- **Program day calculation:** ABC cycle Day 1 = Feb 16, 2026. The ABF4FL program cycles every 28 days (Weeks 1-3 base, Week 4 hypertrophy). Fighter Pullup/Pushup programs start Feb 12, 2026 (linear day count): days 1-12 = 3RM phase, days 13-42 = 5RM phase, then retest.
 - **API pattern:** All CRUD goes through `/api/log`. Client components use `fetch()` then `router.refresh()` (not `window.location.reload()`).
 - **Naming:** Components PascalCase, functions camelCase, constants UPPER_SNAKE_CASE.
 - **Path alias:** `@/*` maps to `./src/*`.
