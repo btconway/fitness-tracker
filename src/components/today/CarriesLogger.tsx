@@ -21,6 +21,7 @@ export function CarriesLogger({ carryDescription, carryType, todayStr, alreadyLo
     ? (alreadyLogged!.value as BellSize)
     : null;
   const [selectedSize, setSelectedSize] = useState<BellSize | null>(storedSize);
+  const [selectedRounds, setSelectedRounds] = useState<number | null>(alreadyLogged?.rounds ?? null);
   const [isLogging, setIsLogging] = useState(false);
 
   const carryLabel = carryType === 'FARMER' ? 'Farmer Carries'
@@ -28,7 +29,7 @@ export function CarriesLogger({ carryDescription, carryType, todayStr, alreadyLo
     : 'Racked Carries';
 
   async function handleLog() {
-    if (alreadyLogged || isLogging || !selectedSize) return;
+    if (alreadyLogged || isLogging || !selectedSize || !selectedRounds) return;
     setIsLogging(true);
     try {
       const res = await fetch('/api/log', {
@@ -38,6 +39,7 @@ export function CarriesLogger({ carryDescription, carryType, todayStr, alreadyLo
           date: todayStr,
           type: 'CARRIES',
           value: selectedSize,
+          rounds: selectedRounds,
           note: carryLabel,
         }),
       });
@@ -65,7 +67,7 @@ export function CarriesLogger({ carryDescription, carryType, todayStr, alreadyLo
 
       {alreadyLogged ? (
         <p className="text-xs text-emerald-600 font-medium">
-          Logged with {alreadyLogged.value}
+          Logged with {alreadyLogged.value}{alreadyLogged.rounds ? ` · ${alreadyLogged.rounds} rounds` : ''}
         </p>
       ) : (
         <>
@@ -85,9 +87,25 @@ export function CarriesLogger({ carryDescription, carryType, todayStr, alreadyLo
               </button>
             ))}
           </div>
+          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-2">Rounds</p>
+          <div className="flex gap-2 mb-3">
+            {[1, 2, 3, 4, 5, 6].map(r => (
+              <button
+                key={r}
+                onClick={() => setSelectedRounds(r)}
+                className={`flex-1 h-11 rounded-lg font-semibold text-sm transition-colors ${
+                  selectedRounds === r
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-zinc-100 text-slate-700 hover:bg-zinc-200'
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
           <button
             onClick={handleLog}
-            disabled={isLogging || !selectedSize}
+            disabled={isLogging || !selectedSize || !selectedRounds}
             className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40"
           >
             {isLogging ? 'Logging...' : 'Log Carries'}
