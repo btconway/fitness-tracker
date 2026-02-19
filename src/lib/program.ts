@@ -12,6 +12,7 @@ export interface DayPlan {
   title: string;
   exercises: Exercise[];
   carries?: string;
+  carryType?: 'FARMER' | 'SUITCASE' | 'RACKED';
   stepsGoal: number;
   notes: string;
   roundsRange?: [number, number];
@@ -21,170 +22,182 @@ export interface DayPlan {
 }
 
 const STANDARD_WARMUP = [
-  'Hang from bar (30-60s)',
-  'Deep goblet squat sit (2-3 min)',
-  'Short brisk walk (5 min)',
+  'Hang from bar',
+  'Deep squat sit',
+  'Short brisk walk',
 ];
 
 const STANDARD_COOLDOWN = [
-  'Cool down walk: 15-30 minutes',
+  'Cool down walk: 15–30 minutes',
 ];
 
 // ---- WEEKS 1-3 BASE TEMPLATE (7-day pattern) ----
 const WEEK_BASE: Omit<DayPlan, 'dayNumber'>[] = [
   {
+    // Day 1: AB Complex + Farmer Carries
     type: 'AB_COMPLEX',
-    title: 'AB Complex + Farmer Carries',
+    title: 'Armor Building Complex + Carries',
     exercises: [
       { name: 'Double KB Clean', reps: '2' },
       { name: 'Double KB Press', reps: '1' },
       { name: 'Front Squat', reps: '3' },
     ],
     carries: 'Farmer Carries: 3 x 40 yards',
+    carryType: 'FARMER',
     stepsGoal: 10000,
-    notes: 'Focus on form.',
+    notes: 'Strive for 10,000 steps a day.',
     roundsRange: [3, 5],
     warmup: STANDARD_WARMUP,
     cooldown: STANDARD_COOLDOWN,
   },
   {
+    // Day 2: Walk + Movement Only
     type: 'WALK_MOVEMENT',
     title: 'Walk + Movement Only',
     exercises: [],
     stepsGoal: 10000,
-    notes: '45-60 min walk, ideally fasted.',
-    detailedNotes: '45-60 min walk, ideally fasted. Mobility: Original Strength resets, foam rolling, or yoga. Focus on nasal breathing.',
+    notes: 'Walk: 45–60 minutes, ideally fasted. Mobility: Original Strength, foam rolling, floor work. Optional: Light swings or band work. Strive for 10,000 steps a day. This is the daily total, strive to get 3,000 to 5,000 in that morning walk.',
   },
   {
+    // Day 3: AB Complex + Suitcase Carries
     type: 'AB_COMPLEX',
-    title: 'AB Complex + Suitcase Carries',
+    title: 'Armor Building Complex + Carries',
     exercises: [
       { name: 'Double KB Clean', reps: '2' },
       { name: 'Double KB Press', reps: '1' },
       { name: 'Front Squat', reps: '3' },
     ],
-    carries: 'Suitcase Carries: 2-4 rounds (switch hands)',
+    carries: 'Suitcase Carries: Down with one hand; back with the other, 2–4 rounds',
+    carryType: 'SUITCASE',
     stepsGoal: 10000,
-    notes: 'Build volume.',
+    notes: 'Strive for 10,000 steps a day.',
     roundsRange: [5, 10],
     warmup: STANDARD_WARMUP,
     cooldown: STANDARD_COOLDOWN,
   },
   {
+    // Day 4: Optional Ruck
     type: 'RUCK',
     title: 'Optional Ruck',
     exercises: [],
     stepsGoal: 10000,
-    notes: '30-45 min ruck (5-30 lbs). Focus on posture.',
-    detailedNotes: '30-45 min ruck with 5-30 lbs. Focus on upright posture and brisk pace. Great for GPP and mental toughness.',
+    notes: 'Walk for 30–45 minutes, focus on posture and breathing. Strive for 10,000 steps a day.',
   },
   {
+    // Day 5: AB Complex + Racked Carries
     type: 'AB_COMPLEX',
-    title: 'AB Complex + Racked Carries',
+    title: 'Armor Building Complex + Carries',
     exercises: [
       { name: 'Double KB Clean', reps: '2' },
       { name: 'Double KB Press', reps: '1' },
       { name: 'Front Squat', reps: '3' },
     ],
     carries: 'Racked Carries: 3 x 40 yards',
+    carryType: 'RACKED',
     stepsGoal: 10000,
-    notes: 'Push the pace.',
+    notes: 'Strive for 10,000 steps a day.',
     roundsRange: [5, 10],
     warmup: STANDARD_WARMUP,
     cooldown: STANDARD_COOLDOWN,
   },
   {
+    // Day 6: Rebuild + Reflection
     type: 'RECOVERY',
     title: 'Rebuild + Reflection',
     exercises: [],
     stepsGoal: 10000,
-    notes: 'Active recovery or total off day. Get the steps.',
-    detailedNotes: 'Active recovery: easy walk, mobility, or total off day. Prioritize sleep and nutrition. Get the steps in.',
+    notes: 'Active recovery or Total Off Day but still get those steps in! Reflect: Did I walk? Did I train? Did I eat like an adult? This is designed, originally, for someone who has very busy Monday mornings. Feel free to add more rounds each week, but strive to keep the calories in check and the steps before chasing gains in the weight room.',
   },
   {
+    // Day 7: Rebuild + Reflection
     type: 'RECOVERY',
     title: 'Rebuild + Reflection',
     exercises: [],
     stepsGoal: 10000,
-    notes: 'Reflect: Did I walk? Did I train? Did I eat like an adult?',
-    detailedNotes: 'Weekly reflection: Did I walk every day? Did I train when scheduled? Did I eat like an adult? Adjust next week accordingly.',
+    notes: 'Active recovery or Total Off Day but still get those steps in! Reflect: Did I walk? Did I train? Did I eat like an adult? This is designed, originally, for someone who has very busy Monday mornings. Feel free to add more rounds each week, but strive to keep the calories in check and the steps before chasing gains in the weight room.',
   },
 ];
 
 // ---- WEEK 4 HYPERTROPHY TEMPLATE ----
 const WEEK4_TEMPLATE: Omit<DayPlan, 'dayNumber'>[] = [
   {
+    // Week 4, Day 1: High Rep Pressing + Farmer Carries
     type: 'HYPERTROPHY_PRESS',
-    title: 'Press Ladder + Farmer Carries',
+    title: 'High Rep Pressing + Carries',
     exercises: [
-      { name: 'KB Press Ladder', reps: '2-3-5-10', notes: 'Up to 3 ladders' },
+      { name: 'Double KB Press Ladder', reps: '2–3–5–10', notes: 'Repeat up to 3 times. Feel free to adjust presses, dropping the 10s or changing loads, as appropriate.' },
     ],
     carries: 'Farmer Carries: 3 x 40 yards',
+    carryType: 'FARMER',
     stepsGoal: 10000,
-    notes: 'Press ladder: 2, 3, 5, 10 reps. Repeat up to 3x.',
+    notes: 'Daily goal: 10,000 steps.',
     roundsRange: [1, 3],
     warmup: STANDARD_WARMUP,
     cooldown: STANDARD_COOLDOWN,
   },
   {
+    // Week 4, Day 2: Walk + Movement Only
     type: 'WALK_MOVEMENT',
     title: 'Walk + Movement Only',
     exercises: [],
     stepsGoal: 10000,
-    notes: '45-60 min walk, ideally fasted.',
-    detailedNotes: '45-60 min walk, ideally fasted. Mobility: Original Strength resets, foam rolling, or yoga. Focus on nasal breathing.',
+    notes: 'Walk: 45–60 minutes, ideally fasted. Mobility: Original Strength, foam rolling, floor work. Optional: Light swings or band work. Daily goal: 10,000 steps.',
   },
   {
+    // Week 4, Day 3: AB Complex (High Volume) + Racked Carries
     type: 'AB_COMPLEX',
-    title: 'AB Complex (High Volume) + Racked Carries',
+    title: 'Armor Building Complex + Carries',
     exercises: [
       { name: 'Double KB Clean', reps: '2' },
       { name: 'Double KB Press', reps: '1' },
       { name: 'Front Squat', reps: '3' },
     ],
     carries: 'Racked Carries: 3 x 40 yards',
+    carryType: 'RACKED',
     stepsGoal: 10000,
-    notes: 'High volume day. Push for max rounds.',
+    notes: 'Repeat 10–30 rounds as appropriate. Daily goal: 10,000 steps.',
     roundsRange: [10, 30],
     warmup: STANDARD_WARMUP,
     cooldown: STANDARD_COOLDOWN,
   },
   {
+    // Week 4, Day 4: Optional Ruck
     type: 'RUCK',
     title: 'Optional Ruck',
     exercises: [],
     stepsGoal: 10000,
-    notes: '30-45 min ruck (5-30 lbs). Focus on posture.',
-    detailedNotes: '30-45 min ruck with 5-30 lbs. Focus on upright posture and brisk pace. Great for GPP and mental toughness.',
+    notes: 'Light pack (20–30 lbs). Walk: 30–45 minutes, focus on posture and breathing. Daily goal: 10,000 steps.',
   },
   {
+    // Week 4, Day 5: High Rep Pressing + Suitcase Carries
     type: 'HYPERTROPHY_PRESS',
-    title: 'High Rep Pressing + Suitcase Carries',
+    title: 'High Rep Pressing + Carries',
     exercises: [
-      { name: 'KB Press Ladder', reps: '2-3-5-10', notes: 'Up to 5 ladders' },
+      { name: 'Double KB Press Ladder', reps: '2–3–5–10', notes: 'Repeat up to 5 times.' },
     ],
-    carries: 'Suitcase Carries: 2-4 rounds (switch hands)',
+    carries: 'Suitcase Carries: Down with one hand; back with the other, 2–4 rounds',
+    carryType: 'SUITCASE',
     stepsGoal: 10000,
-    notes: 'Press ladder: 2, 3, 5, 10 reps. Repeat up to 5x.',
+    notes: 'Daily goal: 10,000 steps.',
     roundsRange: [1, 5],
     warmup: STANDARD_WARMUP,
     cooldown: STANDARD_COOLDOWN,
   },
   {
+    // Week 4, Day 6: Rebuild + Reflection
     type: 'RECOVERY',
     title: 'Rebuild + Reflection',
     exercises: [],
     stepsGoal: 10000,
-    notes: 'Active recovery or total off day. Get the steps.',
-    detailedNotes: 'Active recovery: easy walk, mobility, or total off day. Prioritize sleep and nutrition. Get the steps in.',
+    notes: 'Active recovery or total off day, but still hit your step count. Reflect: Did I walk? Did I train? Did I eat like an adult? Strive to dial in daily calories, the walking, and the lifting program. If you feel the need to "add more," first see if you are actually eating your calorie numbers and getting in the steps. You can NOT out train bad choices in food consumption!',
   },
   {
+    // Week 4, Day 7: Rebuild + Reflection
     type: 'RECOVERY',
     title: 'Rebuild + Reflection',
     exercises: [],
     stepsGoal: 10000,
-    notes: 'Reflect: Did I walk? Did I train? Did I eat like an adult?',
-    detailedNotes: 'Weekly reflection: Did I walk every day? Did I train when scheduled? Did I eat like an adult? Adjust next week accordingly.',
+    notes: 'Active recovery or total off day, but still hit your step count. Reflect: Did I walk? Did I train? Did I eat like an adult? Strive to dial in daily calories, the walking, and the lifting program. If you feel the need to "add more," first see if you are actually eating your calorie numbers and getting in the steps. You can NOT out train bad choices in food consumption!',
   },
 ];
 
