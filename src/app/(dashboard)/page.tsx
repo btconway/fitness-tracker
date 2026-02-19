@@ -2,7 +2,7 @@ import { getTodayContext } from '@/lib/data';
 import { TodayWorkout } from '@/components/today/TodayWorkout';
 import { FighterPullup } from '@/components/today/FighterPullup';
 import { FighterPushup } from '@/components/today/FighterPushup';
-
+import { CarriesLogger } from '@/components/today/CarriesLogger';
 import { StepsLogger } from '@/components/today/StepsLogger';
 import { TodayProgress } from '@/components/today/TodayProgress';
 import { LogSheet } from '@/components/logging/LogSheet';
@@ -32,6 +32,7 @@ export default async function TodayPage() {
     todayPullupTotal,
     todayPushupSets,
     todayPushupTotal,
+    todayCarries,
     lastWeight,
   } = ctx;
 
@@ -66,6 +67,15 @@ export default async function TodayPage() {
         todayStr={todayStr}
         alreadyLogged={!!todayWorkout}
       />
+
+      {plan.carryType && plan.carries && (
+        <CarriesLogger
+          carryDescription={plan.carries}
+          carryType={plan.carryType}
+          todayStr={todayStr}
+          alreadyLogged={todayCarries}
+        />
+      )}
 
       <FighterPullup
         pullupDay={pullupDay}
