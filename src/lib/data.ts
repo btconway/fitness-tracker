@@ -64,6 +64,8 @@ export async function getTodayContext() {
   );
   const todayPushupTotal = todayPushupSets.reduce((a, b) => a + b, 0);
 
+  const todayCarries = todayLogs.find(l => l.type === 'CARRIES') ?? null;
+
   // Last weight for placeholder
   const weightLogs = logs.filter(l => l.type === 'WEIGHT');
   const lastWeight = weightLogs.length > 0 ? parseFloat(weightLogs[0].value) : null;
@@ -81,6 +83,7 @@ export async function getTodayContext() {
     todayPullupTotal,
     todayPushupSets,
     todayPushupTotal,
+    todayCarries,
     lastWeight,
     logs,
   };

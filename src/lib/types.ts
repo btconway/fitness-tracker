@@ -2,7 +2,7 @@ export interface FitnessLog {
   id: number;
   created_at: string;
   date: string;
-  type: 'WORKOUT' | 'STEPS' | 'WEIGHT' | 'PULLUP' | 'PUSHUP';
+  type: 'WORKOUT' | 'STEPS' | 'WEIGHT' | 'PULLUP' | 'PUSHUP' | 'CARRIES';
   value: string;
   rounds: number | null;
   pullup_sets: string | null;
