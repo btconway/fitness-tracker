@@ -17,9 +17,10 @@ interface Props {
 
 export function CarriesLogger({ carryDescription, carryType, todayStr, alreadyLogged }: Props) {
   const router = useRouter();
-  const [selectedSize, setSelectedSize] = useState<BellSize | null>(
-    alreadyLogged ? (alreadyLogged.value as BellSize) : null
-  );
+  const storedSize = BELL_SIZES.includes(alreadyLogged?.value as BellSize)
+    ? (alreadyLogged!.value as BellSize)
+    : null;
+  const [selectedSize, setSelectedSize] = useState<BellSize | null>(storedSize);
   const [isLogging, setIsLogging] = useState(false);
 
   const carryLabel = carryType === 'FARMER' ? 'Farmer Carries'
@@ -27,7 +28,7 @@ export function CarriesLogger({ carryDescription, carryType, todayStr, alreadyLo
     : 'Racked Carries';
 
   async function handleLog() {
-    if (isLogging || !selectedSize) return;
+    if (alreadyLogged || isLogging || !selectedSize) return;
     setIsLogging(true);
     try {
       const res = await fetch('/api/log', {
