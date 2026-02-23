@@ -278,9 +278,29 @@ export const FIGHTER_5RM: PullupDay[] = [
   { day: 30, sets: [], rest: true },
 ];
 
+/** Count weekdays (Mon-Fri) from startDate to targetDate, inclusive */
+function countWeekdays(startDate: Date, targetDate: Date): number {
+  let count = 0;
+  const current = new Date(startDate);
+  while (current <= targetDate) {
+    const dow = current.getDay();
+    if (dow !== 0 && dow !== 6) count++;
+    current.setDate(current.getDate() + 1);
+  }
+  return count;
+}
+
+function isWeekend(date: Date): boolean {
+  const dow = date.getDay();
+  return dow === 0 || dow === 6;
+}
+
 export function getFighterPullupDay(startDate: Date, targetDate: Date) {
-  const diffTime = Math.abs(targetDate.getTime() - startDate.getTime());
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  if (isWeekend(targetDate)) {
+    return { program: 'REST' as const, day: 0, sets: [] as number[], rest: true };
+  }
+
+  const diffDays = countWeekdays(startDate, targetDate);
 
   if (diffDays <= 12) {
     return { program: '3RM' as const, ...FIGHTER_3RM[diffDays - 1] };
@@ -341,8 +361,11 @@ export const PUSHUP_GTG_PHASE2: PushupDay[] = [
 ];
 
 export function getFighterPushupDay(startDate: Date, targetDate: Date) {
-  const diffTime = Math.abs(targetDate.getTime() - startDate.getTime());
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  if (isWeekend(targetDate)) {
+    return { program: 'REST' as const, day: 0, sets: [] as number[], rest: true };
+  }
+
+  const diffDays = countWeekdays(startDate, targetDate);
 
   if (diffDays <= 12) {
     return { program: 'Phase 1' as const, ...PUSHUP_GTG_PHASE1[diffDays - 1] };
