@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
-import type { LogType } from '@/lib/types';
+import { BELL_SIZES, type BellSize, type LogType } from '@/lib/types';
 
 interface Props {
   defaultDate: string;
@@ -20,6 +20,7 @@ export function LogSheet({ defaultDate }: Props) {
   const [weight, setWeight] = useState('');
   const [pullupSets, setPullupSets] = useState('');
   const [pushupSets, setPushupSets] = useState('');
+  const [bellSize, setBellSize] = useState<BellSize | null>(null);
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,6 +30,7 @@ export function LogSheet({ defaultDate }: Props) {
     setWeight('');
     setPullupSets('');
     setPushupSets('');
+    setBellSize(null);
     setNote('');
   }
 
@@ -49,6 +51,7 @@ export function LogSheet({ defaultDate }: Props) {
     };
 
     if (type === 'WORKOUT' && rounds) payload.rounds = parseInt(rounds);
+    if (type === 'WORKOUT' && bellSize) payload.bell_size = bellSize;
     if (type === 'PULLUP' && pullupSets) payload.pullup_sets = pullupSets;
     if (type === 'PUSHUP' && pushupSets) payload.pushup_sets = pushupSets;
 
@@ -127,6 +130,28 @@ export function LogSheet({ defaultDate }: Props) {
                 placeholder="5"
                 className={inputClass}
               />
+            </div>
+          )}
+
+          {type === 'WORKOUT' && (
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Bell Size</label>
+              <div className="flex gap-2">
+                {BELL_SIZES.map(size => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => setBellSize(size)}
+                    className={`flex-1 h-11 rounded-lg font-semibold text-sm transition-colors ${
+                      bellSize === size
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-zinc-100 text-slate-700 hover:bg-zinc-200'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
