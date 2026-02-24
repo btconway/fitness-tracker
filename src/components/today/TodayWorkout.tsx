@@ -23,6 +23,8 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
   const router = useRouter();
   const [selectedRounds, setSelectedRounds] = useState<number | null>(null);
   const [isLogging, setIsLogging] = useState(false);
+  const [selectedBell, setSelectedBell] = useState<string | null>(null);
+  const BELL_SIZES = ['24 kg', '28 kg', '32 kg'];
 
   const borderColor = TYPE_COLORS[plan.type] || 'border-l-slate-400';
   const hasRounds = plan.type === 'AB_COMPLEX' || plan.type === 'HYPERTROPHY_PRESS';
@@ -46,6 +48,7 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
           type: 'WORKOUT',
           value: 'COMPLETED',
           rounds: selectedRounds,
+          bell_size: selectedBell,
           note: null,
         }),
       });
@@ -121,6 +124,21 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
 
       {hasRounds && !alreadyLogged && (
         <>
+          <div className="flex gap-2 mb-3">
+            {BELL_SIZES.map(size => (
+              <button
+                key={size}
+                onClick={() => setSelectedBell(size)}
+                className={`flex-1 h-11 rounded-lg font-semibold text-sm transition-colors ${
+                  selectedBell === size
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-zinc-100 text-slate-700 hover:bg-zinc-200'
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
           <div className="flex gap-2 mb-3 flex-wrap">
             {roundOptions.map(r => (
               <button
@@ -138,7 +156,7 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
           </div>
           <button
             onClick={handleLog}
-            disabled={isLogging || !selectedRounds}
+            disabled={isLogging || !selectedRounds || !selectedBell}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40"
           >
             {isLogging ? 'Logging...' : 'Log Workout'}
