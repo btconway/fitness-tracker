@@ -12,3 +12,6 @@ export interface FitnessLog {
 }
 
 export type LogType = FitnessLog['type'];
+
+export const BELL_SIZES = ['24 kg', '28 kg', '32 kg'] as const;
+export type BellSize = typeof BELL_SIZES[number];

@@ -3,10 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
+import { BELL_SIZES, type BellSize } from '@/lib/types';
 import type { FitnessLog } from '@/lib/types';
-
-const BELL_SIZES = ['24 kg', '28 kg', '32 kg'] as const;
-type BellSize = typeof BELL_SIZES[number];
 
 interface Props {
   carryDescription: string;

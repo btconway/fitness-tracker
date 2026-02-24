@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import type { DayPlan } from '@/lib/program';
+import { BELL_SIZES, type BellSize } from '@/lib/types';
 
 const TYPE_COLORS: Record<string, string> = {
   AB_COMPLEX: 'border-l-blue-500',
@@ -23,8 +24,7 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
   const router = useRouter();
   const [selectedRounds, setSelectedRounds] = useState<number | null>(null);
   const [isLogging, setIsLogging] = useState(false);
-  const [selectedBell, setSelectedBell] = useState<string | null>(null);
-  const BELL_SIZES = ['24 kg', '28 kg', '32 kg'];
+  const [selectedBell, setSelectedBell] = useState<BellSize | null>(null);
 
   const borderColor = TYPE_COLORS[plan.type] || 'border-l-slate-400';
   const hasRounds = plan.type === 'AB_COMPLEX' || plan.type === 'HYPERTROPHY_PRESS';
