@@ -7,6 +7,7 @@ export interface FitnessLog {
   rounds: number | null;
   pullup_sets: string | null;
   pushup_sets: string | null;
+  bell_size: string | null;
   note: string | null;
 }
 
