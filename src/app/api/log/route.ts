@@ -11,10 +11,10 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await req.json();
-    const { date, type, value, note, rounds, pullup_sets, pushup_sets } = data;
+    const { date, type, value, note, rounds, pullup_sets, pushup_sets, bell_size } = data;
 
     await initDb();
-    await sql`INSERT INTO fitness_logs (date, type, value, rounds, pullup_sets, pushup_sets, note) VALUES (${date}, ${type}, ${value}, ${rounds || null}, ${pullup_sets || null}, ${pushup_sets || null}, ${note})`;
+    await sql`INSERT INTO fitness_logs (date, type, value, rounds, pullup_sets, pushup_sets, bell_size, note) VALUES (${date}, ${type}, ${value}, ${rounds || null}, ${pullup_sets || null}, ${pushup_sets || null}, ${bell_size || null}, ${note})`;
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
@@ -88,13 +88,13 @@ export async function PATCH(req: NextRequest) {
     }
 
     const data = await req.json();
-    const { id, rounds, note } = data;
+    const { id, rounds, note, bell_size } = data;
     
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing id parameter' }, { status: 400 });
     }
 
-    await sql`UPDATE fitness_logs SET rounds = ${rounds || null}, note = ${note || null} WHERE id = ${id}`;
+    await sql`UPDATE fitness_logs SET rounds = ${rounds || null}, note = ${note || null}, bell_size = ${bell_size || null} WHERE id = ${id}`;
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
