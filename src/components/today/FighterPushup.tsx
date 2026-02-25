@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import { getCompletedSetIndices } from '@/lib/utils';
@@ -17,11 +17,28 @@ interface Props {
   todayStr: string;
   todaySets: number[];
   todayTotal: number;
+  lastSetAt?: string | null;
 }
 
-export function FighterPushup({ pushupDay, todayStr, todaySets, todayTotal }: Props) {
+function formatElapsed(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+export function FighterPushup({ pushupDay, todayStr, todaySets, todayTotal, lastSetAt }: Props) {
   const router = useRouter();
   const [isLogging, setIsLogging] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  useEffect(() => {
+    if (!lastSetAt) return;
+    const ref = new Date(lastSetAt).getTime();
+    const tick = () => setElapsedSeconds(Math.floor((Date.now() - ref) / 1000));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [lastSetAt]);
 
   const completedIndices = getCompletedSetIndices(pushupDay.sets, todaySets);
   const allDone = pushupDay.sets.length > 0 && completedIndices.size === pushupDay.sets.length;
@@ -129,6 +146,12 @@ export function FighterPushup({ pushupDay, todayStr, todaySets, todayTotal }: Pr
           );
         })}
       </div>
+
+      {lastSetAt && (
+        <p className="text-xs text-slate-400 text-center mb-2">
+          {formatElapsed(elapsedSeconds)} since last set
+        </p>
+      )}
 
       {/* Progress text */}
       {todaySets.length > 0 && !allDone && (

@@ -33,6 +33,8 @@ export default async function TodayPage() {
     todayPushupSets,
     todayPushupTotal,
     todayCarries,
+    lastPullupAt,
+    lastPushupAt,
     lastWeight,
   } = ctx;
 
@@ -82,6 +84,7 @@ export default async function TodayPage() {
         todayStr={todayStr}
         todaySets={todayPullupSets}
         todayTotal={todayPullupTotal}
+        lastSetAt={lastPullupAt}
       />
 
       <FighterPushup
@@ -89,6 +92,7 @@ export default async function TodayPage() {
         todayStr={todayStr}
         todaySets={todayPushupSets}
         todayTotal={todayPushupTotal}
+        lastSetAt={lastPushupAt}
       />
 
       <StepsLogger
