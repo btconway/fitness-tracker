@@ -128,7 +128,7 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
             {BELL_SIZES.map(size => (
               <button
                 key={size}
-                onClick={() => setSelectedBell(size)}
+                onClick={() => setSelectedBell(selectedBell === size ? null : size)}
                 className={`flex-1 h-11 rounded-lg font-semibold text-sm transition-colors ${
                   selectedBell === size
                     ? 'bg-blue-600 text-white'

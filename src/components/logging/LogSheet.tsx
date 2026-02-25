@@ -141,7 +141,7 @@ export function LogSheet({ defaultDate }: Props) {
                   <button
                     key={size}
                     type="button"
-                    onClick={() => setBellSize(size)}
+                    onClick={() => setBellSize(bellSize === size ? null : size)}
                     className={`flex-1 h-11 rounded-lg font-semibold text-sm transition-colors ${
                       bellSize === size
                         ? 'bg-blue-600 text-white'
