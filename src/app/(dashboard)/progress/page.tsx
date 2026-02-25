@@ -73,8 +73,11 @@ export default async function ProgressPage() {
             <div key={i} className="px-4 py-2 flex justify-between items-center border-t border-zinc-100 text-sm">
               <div>
                 <span className="text-[10px] font-semibold uppercase text-blue-600">{log.type}</span>
-                {log.type === 'WORKOUT' && log.rounds && (
-                  <span className="ml-2 text-slate-700">{log.rounds} rounds</span>
+                {log.type === 'WORKOUT' && (
+                  <>
+                    {log.rounds && <span className="ml-2 text-slate-700">{log.rounds} rounds</span>}
+                    {log.bell_size && <span className="ml-2 text-slate-500">{log.bell_size}</span>}
+                  </>
                 )}
                 {log.type === 'STEPS' && (
                   <span className="ml-2 text-slate-700">{parseInt(log.value).toLocaleString()} steps</span>

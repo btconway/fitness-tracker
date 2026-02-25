@@ -159,7 +159,12 @@ export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
                       {TYPE_LABELS[log.type] || log.type}
                     </span>
                     <div className="mt-1 text-sm text-slate-700">
-                      {log.type === 'WORKOUT' && log.rounds && <span>{log.rounds} rounds</span>}
+                      {log.type === 'WORKOUT' && (
+                        <span>
+                          {log.rounds ? `${log.rounds} rounds` : ''}
+                          {log.bell_size ? `${log.rounds ? ' · ' : ''}${log.bell_size}` : ''}
+                        </span>
+                      )}
                       {log.type === 'STEPS' && <span>{parseInt(log.value).toLocaleString()} steps</span>}
                       {log.type === 'WEIGHT' && <span>{parseFloat(log.value).toFixed(1)} lbs</span>}
                       {log.type === 'PULLUP' && log.pullup_sets && (
