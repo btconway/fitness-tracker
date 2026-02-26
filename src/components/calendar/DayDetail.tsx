@@ -6,6 +6,7 @@ import type { DayInfo } from './types';
 
 const TYPE_LABELS: Record<string, string> = {
   WORKOUT: 'Workout',
+  CARRIES: 'Carries',
   STEPS: 'Steps',
   WEIGHT: 'Weight',
   PULLUP: 'Pull-ups',
@@ -14,6 +15,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 const TYPE_BADGE: Record<string, string> = {
   WORKOUT: 'bg-blue-100 text-blue-700',
+  CARRIES: 'bg-orange-100 text-orange-700',
   STEPS: 'bg-amber-100 text-amber-700',
   WEIGHT: 'bg-purple-100 text-purple-700',
   PULLUP: 'bg-indigo-100 text-indigo-700',
@@ -32,6 +34,14 @@ interface Props {
   dayInfo: DayInfo | null;
   onClose: () => void;
   onDeleteLog: (id: number) => void;
+}
+
+function parseSetTotal(sets: string): number {
+  return sets
+    .split(',')
+    .map(s => parseInt(s.trim(), 10))
+    .filter(Number.isFinite)
+    .reduce((a, b) => a + b, 0);
 }
 
 export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
@@ -58,14 +68,25 @@ export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
 
   const borderColor = WORKOUT_BORDER[dayInfo.plan.type] || 'border-l-slate-400';
   const { plan, pullupDay, pushupDay } = dayInfo;
+  const hasCompletedWorkout = dayInfo.logs.some(log => log.type === 'WORKOUT' || log.type === 'CARRIES');
 
   return (
     <BottomSheet open={true} onClose={onClose} title={dateLabel}>
-      {/* Prescribed Section */}
+      <div className={`mb-4 rounded-lg border px-3 py-2 ${dayInfo.isFuture ? 'bg-blue-50 border-blue-200' : 'bg-emerald-50 border-emerald-200'}`}>
+        <p className={`text-xs font-medium ${dayInfo.isFuture ? 'text-blue-700' : 'text-emerald-700'}`}>
+          {dayInfo.isFuture
+            ? 'Upcoming day preview'
+            : hasCompletedWorkout
+              ? 'Workout logged for this day'
+              : 'No workout logged yet'}
+        </p>
+      </div>
+
+      {/* Planned/Upcoming Section */}
       {dayInfo.isProgramActive && (
         <div className="mb-4">
           <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-2">
-            Prescribed
+            {dayInfo.isFuture ? 'Coming Up' : 'Planned'}
             {dayInfo.isProgramActive && (
               <span className="ml-2 normal-case tracking-normal text-slate-300">
                 Day {dayInfo.cycleDay}/28 &middot; Week {dayInfo.cycleWeek}
@@ -146,10 +167,10 @@ export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
       {!dayInfo.isFuture && (
         <div>
           <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-2">
-            Logged
+            Completed
           </h3>
           {dayInfo.logs.length === 0 ? (
-            <p className="text-sm text-slate-400 py-3 text-center">Nothing logged</p>
+            <p className="text-sm text-slate-400 py-3 text-center">No entries logged</p>
           ) : (
             <div className="space-y-2 pb-2">
               {dayInfo.logs.map(log => (
@@ -161,20 +182,37 @@ export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
                     <div className="mt-1 text-sm text-slate-700">
                       {log.type === 'WORKOUT' && (
                         <span>
-                          {log.rounds ? `${log.rounds} rounds` : ''}
-                          {log.bell_size ? `${log.rounds ? ' · ' : ''}${log.bell_size}` : ''}
+                          {plan.title}
+                          {log.rounds ? ` · ${log.rounds} rounds` : ''}
+                          {log.bell_size ? ` · ${log.bell_size}` : ''}
+                          {log.secondary_bell_size && log.secondary_rounds
+                            ? ` · ${log.secondary_rounds} rounds @ ${log.secondary_bell_size}`
+                            : ''}
                         </span>
                       )}
-                      {log.type === 'STEPS' && <span>{parseInt(log.value).toLocaleString()} steps</span>}
-                      {log.type === 'WEIGHT' && <span>{parseFloat(log.value).toFixed(1)} lbs</span>}
+                      {log.type === 'CARRIES' && (
+                        <span>
+                          {log.note || 'Carries'}
+                          {log.value ? ` · ${log.value}` : ''}
+                          {log.rounds ? ` · ${log.rounds} rounds` : ''}
+                        </span>
+                      )}
+                      {log.type === 'STEPS' && (
+                        <span>{(Number.parseInt(log.value, 10) || 0).toLocaleString()} steps</span>
+                      )}
+                      {log.type === 'WEIGHT' && (
+                        <span>{(Number.parseFloat(log.value) || 0).toFixed(1)} lbs</span>
+                      )}
                       {log.type === 'PULLUP' && log.pullup_sets && (
-                        <span>Sets: {log.pullup_sets} ({log.pullup_sets.split(',').reduce((a, s) => a + parseInt(s.trim()), 0)} total)</span>
+                        <span>Sets: {log.pullup_sets} ({parseSetTotal(log.pullup_sets)} total)</span>
                       )}
                       {log.type === 'PUSHUP' && log.pushup_sets && (
-                        <span>Sets: {log.pushup_sets} ({log.pushup_sets.split(',').reduce((a, s) => a + parseInt(s.trim()), 0)} total)</span>
+                        <span>Sets: {log.pushup_sets} ({parseSetTotal(log.pushup_sets)} total)</span>
                       )}
                     </div>
-                    {log.note && <p className="text-xs text-slate-500 mt-1 italic">{log.note}</p>}
+                    {log.note && log.type !== 'CARRIES' && (
+                      <p className="text-xs text-slate-500 mt-1 italic">{log.note}</p>
+                    )}
                   </div>
                   <button
                     onClick={() => handleDelete(log.id)}

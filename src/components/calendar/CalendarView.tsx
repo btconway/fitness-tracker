@@ -65,7 +65,8 @@ function computeDayStatus(
   pushupDay: { sets: number[]; rest: boolean },
 ): DayStatus {
   const isRecovery = plan.type === 'RECOVERY';
-  const workout: Status = isRecovery ? 'done' : dayLogs.some(l => l.type === 'WORKOUT') ? 'done' : 'none';
+  const hasWorkoutLog = dayLogs.some(l => l.type === 'WORKOUT' || l.type === 'CARRIES');
+  const workout: Status = isRecovery ? 'done' : hasWorkoutLog ? 'done' : 'none';
   const steps: Status = dayLogs.some(l => l.type === 'STEPS') ? 'done' : 'none';
   const weight: Status = dayLogs.some(l => l.type === 'WEIGHT') ? 'done' : 'none';
 
@@ -276,6 +277,10 @@ export function CalendarView({ initialMonth, initialLogs, todayStr }: Props) {
           <ChevronRight size={20} className="text-slate-600" />
         </button>
       </div>
+
+      <p className="text-xs text-slate-500 mb-3">
+        Tap a day to view completed entries or upcoming workouts.
+      </p>
 
       {/* Content */}
       <div className={loading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
