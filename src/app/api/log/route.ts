@@ -11,10 +11,49 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await req.json();
-    const { date, type, value, note, rounds, pullup_sets, pushup_sets, bell_size } = data;
+    const {
+      date,
+      type,
+      value,
+      note,
+      rounds,
+      pullup_sets,
+      pushup_sets,
+      bell_size,
+      secondary_bell_size,
+      secondary_rounds,
+    } = data;
+
+    const hasSecondaryBell =
+      secondary_bell_size !== undefined &&
+      secondary_bell_size !== null &&
+      secondary_bell_size !== '';
+    const hasSecondaryRounds =
+      secondary_rounds !== undefined &&
+      secondary_rounds !== null &&
+      secondary_rounds !== '';
+
+    if (hasSecondaryBell !== hasSecondaryRounds) {
+      return NextResponse.json(
+        { success: false, error: 'secondary_bell_size and secondary_rounds must be provided together' },
+        { status: 400 }
+      );
+    }
+
+    let normalizedSecondaryRounds: number | null = null;
+    if (hasSecondaryRounds) {
+      const parsed = Number(secondary_rounds);
+      if (!Number.isInteger(parsed) || parsed < 1) {
+        return NextResponse.json(
+          { success: false, error: 'secondary_rounds must be a positive integer' },
+          { status: 400 }
+        );
+      }
+      normalizedSecondaryRounds = parsed;
+    }
 
     await initDb();
-    await sql`INSERT INTO fitness_logs (date, type, value, rounds, pullup_sets, pushup_sets, bell_size, note) VALUES (${date}, ${type}, ${value}, ${rounds || null}, ${pullup_sets || null}, ${pushup_sets || null}, ${bell_size || null}, ${note})`;
+    await sql`INSERT INTO fitness_logs (date, type, value, rounds, pullup_sets, pushup_sets, bell_size, secondary_bell_size, secondary_rounds, note) VALUES (${date}, ${type}, ${value}, ${rounds || null}, ${pullup_sets || null}, ${pushup_sets || null}, ${bell_size || null}, ${hasSecondaryBell ? secondary_bell_size : null}, ${normalizedSecondaryRounds}, ${note})`;
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
@@ -88,13 +127,52 @@ export async function PATCH(req: NextRequest) {
     }
 
     const data = await req.json();
-    const { id, rounds, note, bell_size } = data;
-    
+    const { id, rounds, note, bell_size, secondary_bell_size, secondary_rounds } = data;
+    const hasField = (field: string) => Object.prototype.hasOwnProperty.call(data, field);
+
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing id parameter' }, { status: 400 });
     }
 
-    await sql`UPDATE fitness_logs SET rounds = ${rounds || null}, note = ${note || null}, bell_size = ${bell_size || null} WHERE id = ${id}`;
+    const hasSecondaryBellField = hasField('secondary_bell_size');
+    const hasSecondaryRoundsField = hasField('secondary_rounds');
+    if (hasSecondaryBellField !== hasSecondaryRoundsField) {
+      return NextResponse.json(
+        { success: false, error: 'secondary_bell_size and secondary_rounds must be patched together' },
+        { status: 400 }
+      );
+    }
+
+    let normalizedSecondaryRounds: number | null = null;
+    if (hasSecondaryRoundsField) {
+      if (secondary_rounds !== null && secondary_rounds !== '') {
+        const parsed = Number(secondary_rounds);
+        if (!Number.isInteger(parsed) || parsed < 1) {
+          return NextResponse.json(
+            { success: false, error: 'secondary_rounds must be a positive integer' },
+            { status: 400 }
+          );
+        }
+        normalizedSecondaryRounds = parsed;
+      }
+    }
+
+    await sql`
+      UPDATE fitness_logs
+      SET
+        rounds = CASE WHEN ${hasField('rounds')} THEN ${rounds || null} ELSE rounds END,
+        note = CASE WHEN ${hasField('note')} THEN ${note || null} ELSE note END,
+        bell_size = CASE WHEN ${hasField('bell_size')} THEN ${bell_size || null} ELSE bell_size END,
+        secondary_bell_size = CASE
+          WHEN ${hasSecondaryBellField} THEN ${secondary_bell_size || null}
+          ELSE secondary_bell_size
+        END,
+        secondary_rounds = CASE
+          WHEN ${hasSecondaryRoundsField} THEN ${normalizedSecondaryRounds}
+          ELSE secondary_rounds
+        END
+      WHERE id = ${id}
+    `;
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';

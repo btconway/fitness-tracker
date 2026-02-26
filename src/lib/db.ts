@@ -74,6 +74,20 @@ export async function initDb() {
     } catch {
       // Column might already exist, ignore error
     }
+
+    // Add secondary_bell_size column if it doesn't exist (migration)
+    try {
+      await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS secondary_bell_size TEXT`;
+    } catch {
+      // Column might already exist, ignore error
+    }
+
+    // Add secondary_rounds column if it doesn't exist (migration)
+    try {
+      await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS secondary_rounds INTEGER`;
+    } catch {
+      // Column might already exist, ignore error
+    }
   } catch (error) {
     console.error('Database initialization failed:', error);
     throw error;

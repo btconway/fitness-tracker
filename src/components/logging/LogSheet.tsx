@@ -21,6 +21,8 @@ export function LogSheet({ defaultDate }: Props) {
   const [pullupSets, setPullupSets] = useState('');
   const [pushupSets, setPushupSets] = useState('');
   const [bellSize, setBellSize] = useState<BellSize | null>(null);
+  const [secondaryBellSize, setSecondaryBellSize] = useState<BellSize | null>(null);
+  const [secondaryRounds, setSecondaryRounds] = useState('');
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,11 +33,22 @@ export function LogSheet({ defaultDate }: Props) {
     setPullupSets('');
     setPushupSets('');
     setBellSize(null);
+    setSecondaryBellSize(null);
+    setSecondaryRounds('');
     setNote('');
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (type === 'WORKOUT') {
+      const hasSecondaryBell = secondaryBellSize !== null;
+      const hasSecondaryRounds = secondaryRounds.trim() !== '';
+      if (hasSecondaryBell !== hasSecondaryRounds) {
+        alert('Select rounds for the heavy bell or clear the heavy bell selection');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     const payload: Record<string, unknown> = {
@@ -52,6 +65,10 @@ export function LogSheet({ defaultDate }: Props) {
 
     if (type === 'WORKOUT' && rounds) payload.rounds = parseInt(rounds);
     if (type === 'WORKOUT' && bellSize) payload.bell_size = bellSize;
+    if (type === 'WORKOUT' && secondaryBellSize && secondaryRounds) {
+      payload.secondary_bell_size = secondaryBellSize;
+      payload.secondary_rounds = parseInt(secondaryRounds);
+    }
     if (type === 'PULLUP' && pullupSets) payload.pullup_sets = pullupSets;
     if (type === 'PUSHUP' && pushupSets) payload.pushup_sets = pushupSets;
 
@@ -152,6 +169,45 @@ export function LogSheet({ defaultDate }: Props) {
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {type === 'WORKOUT' && (
+            <div className="border border-dashed border-zinc-300 rounded-lg p-3">
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-2">Heavy bell (optional)</p>
+              <div className="flex gap-2 mb-2">
+                {BELL_SIZES.map(size => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => {
+                      setSecondaryBellSize(secondaryBellSize === size ? null : size);
+                      if (secondaryBellSize === size) setSecondaryRounds('');
+                    }}
+                    className={`flex-1 h-10 rounded-lg font-semibold text-sm transition-colors ${
+                      secondaryBellSize === size
+                        ? 'bg-slate-700 text-white'
+                        : 'bg-zinc-100 text-slate-700 hover:bg-zinc-200'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+              {secondaryBellSize && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Rounds at heavy bell</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={secondaryRounds}
+                    onChange={e => setSecondaryRounds(e.target.value)}
+                    placeholder="1"
+                    className={inputClass}
+                  />
+                </div>
+              )}
             </div>
           )}
 

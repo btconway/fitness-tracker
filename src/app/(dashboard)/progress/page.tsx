@@ -2,6 +2,7 @@ import { fetchAllLogs, computeMetrics } from '@/lib/data';
 import { StatCard } from '@/components/progress/StatCard';
 import { WeightChart } from '@/components/progress/WeightChart';
 import { RoundsChart } from '@/components/progress/RoundsChart';
+import { BellProgressChart } from '@/components/progress/BellProgressChart';
 
 export default async function ProgressPage() {
   let logs;
@@ -58,6 +59,9 @@ export default async function ProgressPage() {
 
       {/* Rounds */}
       <RoundsChart roundsLogs={roundsLogs} />
+
+      {/* Bell progression */}
+      <BellProgressChart logs={logs} />
 
       {/* Lifetime totals */}
       <div className="grid grid-cols-2 gap-3">

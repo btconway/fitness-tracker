@@ -25,6 +25,8 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
   const [selectedRounds, setSelectedRounds] = useState<number | null>(null);
   const [isLogging, setIsLogging] = useState(false);
   const [selectedBell, setSelectedBell] = useState<BellSize | null>(null);
+  const [secondaryBell, setSecondaryBell] = useState<BellSize | null>(null);
+  const [secondaryRounds, setSecondaryRounds] = useState<number | null>(null);
 
   const borderColor = TYPE_COLORS[plan.type] || 'border-l-slate-400';
   const hasRounds = plan.type === 'AB_COMPLEX' || plan.type === 'HYPERTROPHY_PRESS';
@@ -38,6 +40,13 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
 
   async function handleLog() {
     if (isLogging) return;
+    const hasSecondaryBell = secondaryBell !== null;
+    const hasSecondaryRounds = secondaryRounds !== null;
+    if (hasSecondaryBell !== hasSecondaryRounds) {
+      alert('Select heavy-bell rounds or clear the heavy bell selection');
+      return;
+    }
+
     setIsLogging(true);
     try {
       const res = await fetch('/api/log', {
@@ -49,6 +58,12 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
           value: 'COMPLETED',
           rounds: selectedRounds,
           bell_size: selectedBell,
+          ...(hasSecondaryBell && hasSecondaryRounds
+            ? {
+                secondary_bell_size: secondaryBell,
+                secondary_rounds: secondaryRounds,
+              }
+            : {}),
           note: null,
         }),
       });
@@ -153,6 +168,45 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
                 {r}
               </button>
             ))}
+          </div>
+          {/* Secondary (heavier) bell — optional */}
+          <div className="border border-dashed border-zinc-300 rounded-lg p-3 mb-3">
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-2">Heavy bell (optional)</p>
+            <div className="flex gap-2 mb-2">
+              {BELL_SIZES.map(size => (
+                <button
+                  key={size}
+                  onClick={() => {
+                    setSecondaryBell(secondaryBell === size ? null : size);
+                    if (secondaryBell === size) setSecondaryRounds(null);
+                  }}
+                  className={`flex-1 h-10 rounded-lg font-semibold text-sm transition-colors ${
+                    secondaryBell === size
+                      ? 'bg-slate-700 text-white'
+                      : 'bg-zinc-100 text-slate-700 hover:bg-zinc-200'
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+            {secondaryBell && (
+              <div className="flex gap-2 flex-wrap">
+                {roundOptions.map(r => (
+                  <button
+                    key={r}
+                    onClick={() => setSecondaryRounds(secondaryRounds === r ? null : r)}
+                    className={`min-w-[44px] h-10 rounded-lg font-semibold text-sm transition-colors ${
+                      secondaryRounds === r
+                        ? 'bg-slate-700 text-white'
+                        : 'bg-zinc-100 text-slate-700 hover:bg-zinc-200'
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <button
             onClick={handleLog}

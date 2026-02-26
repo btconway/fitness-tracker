@@ -8,6 +8,8 @@ export interface FitnessLog {
   pullup_sets: string | null;
   pushup_sets: string | null;
   bell_size: string | null;
+  secondary_bell_size: string | null;
+  secondary_rounds: number | null;
   note: string | null;
 }
 
