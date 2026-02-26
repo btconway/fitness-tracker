@@ -1,4 +1,4 @@
-import { fetchLogsByMonth } from '@/lib/data';
+import { fetchAllLogs } from '@/lib/data';
 import { getTodayCST, getYearMonth } from '@/lib/date';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import type { FitnessLog } from '@/lib/types';
@@ -9,7 +9,7 @@ export default async function CalendarPage() {
 
   let logs: FitnessLog[] = [];
   try {
-    logs = await fetchLogsByMonth(currentMonth);
+    logs = await fetchAllLogs();
   } catch {
     logs = [];
   }

@@ -10,6 +10,7 @@ interface PushupDayInfo {
   day: number;
   sets: number[];
   rest: boolean;
+  deferredTo?: string;
 }
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
   todayStr: string;
   todaySets: number[];
   todayTotal: number;
+  deferredToday?: boolean;
   lastSetAt?: string | null;
 }
 
@@ -26,7 +28,20 @@ function formatElapsed(seconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-export function FighterPushup({ pushupDay, todayStr, todaySets, todayTotal, lastSetAt }: Props) {
+function formatDateLabel(dateStr?: string): string {
+  if (!dateStr) return 'next business day';
+  const d = new Date(`${dateStr}T12:00:00-06:00`);
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+export function FighterPushup({
+  pushupDay,
+  todayStr,
+  todaySets,
+  todayTotal,
+  deferredToday,
+  lastSetAt,
+}: Props) {
   const router = useRouter();
   const [isLogging, setIsLogging] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -92,6 +107,42 @@ export function FighterPushup({ pushupDay, todayStr, todaySets, todayTotal, last
     } finally {
       setIsLogging(false);
     }
+  }
+
+  async function handleDefer() {
+    if (isLogging || pushupDay.rest || todaySets.length > 0 || deferredToday) return;
+    if (!confirm('Defer today\'s push-up session to the next business day?')) return;
+
+    setIsLogging(true);
+    try {
+      const res = await fetch('/api/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: todayStr,
+          type: 'PUSHUP',
+          value: 'DEFERRED',
+          note: 'Deferred to next business day',
+        }),
+      });
+      if (res.ok) router.refresh();
+      else alert('Failed to defer push-ups');
+    } catch {
+      alert('Error deferring push-ups');
+    } finally {
+      setIsLogging(false);
+    }
+  }
+
+  if (pushupDay.program === 'DEFERRED') {
+    return (
+      <div className="bg-white rounded-xl border border-zinc-200 border-l-4 border-l-emerald-400 p-4">
+        <h3 className="font-semibold text-slate-800 text-sm mb-1">Fighter Push-ups (GTG)</h3>
+        <p className="text-slate-600 text-sm">
+          Deferred today. Next session lands on {formatDateLabel(pushupDay.deferredTo)}.
+        </p>
+      </div>
+    );
   }
 
   if (pushupDay.rest) {
@@ -165,13 +216,24 @@ export function FighterPushup({ pushupDay, todayStr, todaySets, todayTotal, last
           All sets complete! {todayTotal} total reps
         </p>
       ) : (
-        <button
-          onClick={handleLogRemaining}
-          disabled={isLogging}
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40"
-        >
-          {isLogging ? 'Logging...' : completedIndices.size > 0 ? 'Log Remaining Sets' : 'Log All Sets'}
-        </button>
+        <div className="space-y-2">
+          <button
+            onClick={handleLogRemaining}
+            disabled={isLogging}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40"
+          >
+            {isLogging ? 'Logging...' : completedIndices.size > 0 ? 'Log Remaining Sets' : 'Log All Sets'}
+          </button>
+          {todaySets.length === 0 && !deferredToday && (
+            <button
+              onClick={handleDefer}
+              disabled={isLogging}
+              className="w-full bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50 font-medium py-2.5 rounded-lg transition-colors disabled:opacity-40"
+            >
+              {isLogging ? 'Saving...' : 'Defer to Next Business Day'}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

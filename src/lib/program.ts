@@ -230,6 +230,18 @@ export interface PullupDay {
   rest: boolean;
 }
 
+export interface FighterDayInfo {
+  program: string;
+  day: number;
+  sets: number[];
+  rest: boolean;
+  deferredTo?: string;
+}
+
+export interface FighterProgramOptions {
+  deferDates?: string[];
+}
+
 export const FIGHTER_3RM: PullupDay[] = [
   { day: 1, sets: [3, 2, 1, 1], rest: false },
   { day: 2, sets: [3, 2, 1, 1], rest: false },
@@ -295,23 +307,83 @@ function isWeekend(date: Date): boolean {
   return dow === 0 || dow === 6;
 }
 
-export function getFighterPullupDay(startDate: Date, targetDate: Date) {
-  if (isWeekend(targetDate)) {
-    return { program: 'REST' as const, day: 0, sets: [] as number[], rest: true };
+function formatDateKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function isWeekendDateKey(dateStr: string): boolean {
+  const d = new Date(`${dateStr}T12:00:00-06:00`);
+  return isWeekend(d);
+}
+
+function normalizeDeferDates(dates?: string[]): string[] {
+  if (!dates || dates.length === 0) return [];
+  return Array.from(new Set(dates))
+    .filter(date => !isWeekendDateKey(date))
+    .sort();
+}
+
+function countDeferDaysOnOrBefore(deferDates: string[], targetDateStr: string): number {
+  return deferDates.filter(date => date <= targetDateStr).length;
+}
+
+function countDeferDaysBefore(deferDates: string[], targetDateStr: string): number {
+  return deferDates.filter(date => date < targetDateStr).length;
+}
+
+function getNextBusinessDay(targetDate: Date): string {
+  const d = new Date(targetDate);
+  d.setDate(d.getDate() + 1);
+  while (isWeekend(d)) {
+    d.setDate(d.getDate() + 1);
+  }
+  return formatDateKey(d);
+}
+
+export function getFighterPullupDay(
+  startDate: Date,
+  targetDate: Date,
+  options?: FighterProgramOptions
+): FighterDayInfo {
+  const startDateStr = formatDateKey(startDate);
+  const deferDates = normalizeDeferDates(options?.deferDates).filter(date => date >= startDateStr);
+  const targetDateStr = formatDateKey(targetDate);
+  const deferredToday = deferDates.includes(targetDateStr);
+
+  if (deferredToday) {
+    const weekdayCount = countWeekdays(startDate, targetDate);
+    const dayDeferred = Math.max(1, weekdayCount - countDeferDaysBefore(deferDates, targetDateStr));
+    return {
+      program: 'DEFERRED',
+      day: dayDeferred,
+      sets: [],
+      rest: true,
+      deferredTo: getNextBusinessDay(targetDate),
+    };
   }
 
-  const diffDays = countWeekdays(startDate, targetDate);
+  if (isWeekend(targetDate)) {
+    return { program: 'REST', day: 0, sets: [], rest: true };
+  }
+
+  const diffDays = countWeekdays(startDate, targetDate) - countDeferDaysOnOrBefore(deferDates, targetDateStr);
+  if (diffDays <= 0) {
+    return { program: 'REST', day: 0, sets: [], rest: true };
+  }
 
   if (diffDays <= 12) {
-    return { program: '3RM' as const, ...FIGHTER_3RM[diffDays - 1] };
+    return { program: '3RM', ...FIGHTER_3RM[diffDays - 1] };
   }
 
   const fiveRMDay = diffDays - 12;
   if (fiveRMDay <= 30) {
-    return { program: '5RM' as const, ...FIGHTER_5RM[fiveRMDay - 1] };
+    return { program: '5RM', ...FIGHTER_5RM[fiveRMDay - 1] };
   }
 
-  return { program: 'RETEST' as const, day: diffDays, sets: [] as number[], rest: true };
+  return { program: 'RETEST', day: diffDays, sets: [], rest: true };
 }
 
 // ---- Fighter Push-up Program (GTG) ----
@@ -360,21 +432,45 @@ export const PUSHUP_GTG_PHASE2: PushupDay[] = [
   { day: 18, sets: [], rest: true },
 ];
 
-export function getFighterPushupDay(startDate: Date, targetDate: Date) {
-  if (isWeekend(targetDate)) {
-    return { program: 'REST' as const, day: 0, sets: [] as number[], rest: true };
+export function getFighterPushupDay(
+  startDate: Date,
+  targetDate: Date,
+  options?: FighterProgramOptions
+): FighterDayInfo {
+  const startDateStr = formatDateKey(startDate);
+  const deferDates = normalizeDeferDates(options?.deferDates).filter(date => date >= startDateStr);
+  const targetDateStr = formatDateKey(targetDate);
+  const deferredToday = deferDates.includes(targetDateStr);
+
+  if (deferredToday) {
+    const weekdayCount = countWeekdays(startDate, targetDate);
+    const dayDeferred = Math.max(1, weekdayCount - countDeferDaysBefore(deferDates, targetDateStr));
+    return {
+      program: 'DEFERRED',
+      day: dayDeferred,
+      sets: [],
+      rest: true,
+      deferredTo: getNextBusinessDay(targetDate),
+    };
   }
 
-  const diffDays = countWeekdays(startDate, targetDate);
+  if (isWeekend(targetDate)) {
+    return { program: 'REST', day: 0, sets: [], rest: true };
+  }
+
+  const diffDays = countWeekdays(startDate, targetDate) - countDeferDaysOnOrBefore(deferDates, targetDateStr);
+  if (diffDays <= 0) {
+    return { program: 'REST', day: 0, sets: [], rest: true };
+  }
 
   if (diffDays <= 12) {
-    return { program: 'Phase 1' as const, ...PUSHUP_GTG_PHASE1[diffDays - 1] };
+    return { program: 'Phase 1', ...PUSHUP_GTG_PHASE1[diffDays - 1] };
   }
 
   const phase2Day = diffDays - 12;
   if (phase2Day <= 18) {
-    return { program: 'Phase 2' as const, ...PUSHUP_GTG_PHASE2[phase2Day - 1] };
+    return { program: 'Phase 2', ...PUSHUP_GTG_PHASE2[phase2Day - 1] };
   }
 
-  return { program: 'MAINTAIN' as const, day: diffDays, sets: [25, 22, 20, 18, 15] as number[], rest: false };
+  return { program: 'MAINTAIN', day: diffDays, sets: [25, 22, 20, 18, 15], rest: false };
 }

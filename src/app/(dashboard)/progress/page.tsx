@@ -92,8 +92,14 @@ export default async function ProgressPage() {
                 {log.type === 'PULLUP' && log.pullup_sets && (
                   <span className="ml-2 text-slate-700">{log.pullup_sets}</span>
                 )}
+                {log.type === 'PULLUP' && !log.pullup_sets && log.value === 'DEFERRED' && (
+                  <span className="ml-2 text-slate-700">Deferred</span>
+                )}
                 {log.type === 'PUSHUP' && log.pushup_sets && (
                   <span className="ml-2 text-slate-700">{log.pushup_sets}</span>
+                )}
+                {log.type === 'PUSHUP' && !log.pushup_sets && log.value === 'DEFERRED' && (
+                  <span className="ml-2 text-slate-700">Deferred</span>
                 )}
               </div>
               <span className="text-[10px] text-slate-400 font-mono ml-2 shrink-0">{log.date}</span>

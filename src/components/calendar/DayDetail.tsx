@@ -133,7 +133,9 @@ export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
           )}
           {pullupDay.rest && (
             <div className="bg-indigo-50/50 border border-indigo-100 rounded-lg p-3 mb-2">
-              <p className="text-xs text-indigo-400 italic">Pullups: Rest day</p>
+              <p className="text-xs text-indigo-400 italic">
+                {pullupDay.program === 'DEFERRED' ? 'Pullups: Deferred to next business day' : 'Pullups: Rest day'}
+              </p>
             </div>
           )}
 
@@ -150,7 +152,9 @@ export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
           )}
           {pushupDay.rest && (
             <div className="bg-emerald-50/50 border border-emerald-100 rounded-lg p-3 mb-2">
-              <p className="text-xs text-emerald-400 italic">Pushups: Rest day</p>
+              <p className="text-xs text-emerald-400 italic">
+                {pushupDay.program === 'DEFERRED' ? 'Pushups: Deferred to next business day' : 'Pushups: Rest day'}
+              </p>
             </div>
           )}
 
@@ -206,8 +210,14 @@ export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
                       {log.type === 'PULLUP' && log.pullup_sets && (
                         <span>Sets: {log.pullup_sets} ({parseSetTotal(log.pullup_sets)} total)</span>
                       )}
+                      {log.type === 'PULLUP' && !log.pullup_sets && log.value === 'DEFERRED' && (
+                        <span>Deferred to next business day</span>
+                      )}
                       {log.type === 'PUSHUP' && log.pushup_sets && (
                         <span>Sets: {log.pushup_sets} ({parseSetTotal(log.pushup_sets)} total)</span>
+                      )}
+                      {log.type === 'PUSHUP' && !log.pushup_sets && log.value === 'DEFERRED' && (
+                        <span>Deferred to next business day</span>
                       )}
                     </div>
                     {log.note && log.type !== 'CARRIES' && (

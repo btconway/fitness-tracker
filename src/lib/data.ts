@@ -42,10 +42,21 @@ export async function getTodayContext() {
   const todayStr = getTodayCST();
   const nowCST = getNowCST();
 
+  const pullupDeferDates = Array.from(new Set(
+    logs
+      .filter(l => l.type === 'PULLUP' && l.value === 'DEFERRED')
+      .map(l => l.date)
+  ));
+  const pushupDeferDates = Array.from(new Set(
+    logs
+      .filter(l => l.type === 'PUSHUP' && l.value === 'DEFERRED')
+      .map(l => l.date)
+  ));
+
   const cycleDay = getCycleDay(nowCST);
   const plan = getFullPlanForDay(cycleDay);
-  const pullupDay = getFighterPullupDay(PROGRAM_START, nowCST);
-  const pushupDay = getFighterPushupDay(PROGRAM_START, nowCST);
+  const pullupDay = getFighterPullupDay(PROGRAM_START, nowCST, { deferDates: pullupDeferDates });
+  const pushupDay = getFighterPushupDay(PROGRAM_START, nowCST, { deferDates: pushupDeferDates });
 
   const todayLogs = logs.filter(l => l.date === todayStr);
   const todayWorkout = todayLogs.find(l => l.type === 'WORKOUT');
@@ -57,17 +68,19 @@ export async function getTodayContext() {
     l.pullup_sets ? l.pullup_sets.split(',').map(s => parseInt(s.trim())) : []
   );
   const todayPullupTotal = todayPullupSets.reduce((a, b) => a + b, 0);
+  const todayPullupDeferred = todayPullups.some(l => l.value === 'DEFERRED');
 
   const todayPushups = todayLogs.filter(l => l.type === 'PUSHUP');
   const todayPushupSets = todayPushups.flatMap(l =>
     l.pushup_sets ? l.pushup_sets.split(',').map(s => parseInt(s.trim())) : []
   );
   const todayPushupTotal = todayPushupSets.reduce((a, b) => a + b, 0);
+  const todayPushupDeferred = todayPushups.some(l => l.value === 'DEFERRED');
 
   const todayCarries = todayLogs.find(l => l.type === 'CARRIES') ?? null;
 
-  const lastPullupAt = todayPullups[0]?.created_at ?? null;
-  const lastPushupAt = todayPushups[0]?.created_at ?? null;
+  const lastPullupAt = todayPullups.find(l => !!l.pullup_sets)?.created_at ?? null;
+  const lastPushupAt = todayPushups.find(l => !!l.pushup_sets)?.created_at ?? null;
 
   // Last weight for placeholder
   const weightLogs = logs.filter(l => l.type === 'WEIGHT');
@@ -84,8 +97,10 @@ export async function getTodayContext() {
     todayWeight,
     todayPullupSets,
     todayPullupTotal,
+    todayPullupDeferred,
     todayPushupSets,
     todayPushupTotal,
+    todayPushupDeferred,
     todayCarries,
     lastPullupAt,
     lastPushupAt,

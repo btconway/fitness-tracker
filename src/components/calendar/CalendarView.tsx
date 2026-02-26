@@ -37,13 +37,13 @@ function dateToCST(dateStr: string): Date {
   return new Date(`${dateStr}T12:00:00-06:00`);
 }
 
-function getProgramInfo(dateStr: string) {
+function getProgramInfo(dateStr: string, pullupDeferDates: string[], pushupDeferDates: string[]) {
   const date = dateToCST(dateStr);
   const cycleDay = getCycleDay(date);
   const cycleWeek = getCycleWeek(cycleDay);
   const plan = getFullPlanForDay(cycleDay);
-  const pullupDay = getFighterPullupDay(PROGRAM_START, date);
-  const pushupDay = getFighterPushupDay(PROGRAM_START, date);
+  const pullupDay = getFighterPullupDay(PROGRAM_START, date, { deferDates: pullupDeferDates });
+  const pushupDay = getFighterPushupDay(PROGRAM_START, date, { deferDates: pushupDeferDates });
   return { cycleDay, cycleWeek, plan, pullupDay, pushupDay };
 }
 
@@ -83,8 +83,18 @@ function computeDayStatus(
   return { workout, steps, pullups, pushups, weight };
 }
 
-function buildDayInfo(dateStr: string, logs: FitnessLog[], todayStr: string): DayInfo {
-  const { cycleDay, cycleWeek, plan, pullupDay, pushupDay } = getProgramInfo(dateStr);
+function buildDayInfo(
+  dateStr: string,
+  logs: FitnessLog[],
+  todayStr: string,
+  pullupDeferDates: string[],
+  pushupDeferDates: string[]
+): DayInfo {
+  const { cycleDay, cycleWeek, plan, pullupDay, pushupDay } = getProgramInfo(
+    dateStr,
+    pullupDeferDates,
+    pushupDeferDates
+  );
   const dayLogs = logs.filter(l => l.date === dateStr);
   const isFuture = dateStr > todayStr;
   const isToday = dateStr === todayStr;
@@ -129,18 +139,14 @@ export function CalendarView({ initialMonth, initialLogs, todayStr }: Props) {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchLogs = useCallback(async (months: string[]) => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
-      const allLogs: FitnessLog[] = [];
-      await Promise.all(months.map(async (m) => {
-        const res = await fetch(`/api/log?month=${m}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) allLogs.push(...data);
-        }
-      }));
-      setLogs(allLogs);
+      const res = await fetch('/api/log');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) setLogs(data);
+      }
     } finally {
       setLoading(false);
     }
@@ -149,25 +155,14 @@ export function CalendarView({ initialMonth, initialLogs, todayStr }: Props) {
   // Refetch when week changes
   useEffect(() => {
     if (viewMode !== 'week') return;
-    const dates = getWeekDates(weekStart);
-    const months = [...new Set(dates.map(d => d.substring(0, 7)))];
-    const allInInitial = months.length === 1 && months[0] === initialMonth;
-    if (allInInitial) {
-      setLogs(initialLogs);
-    } else {
-      fetchLogs(months);
-    }
+    fetchLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [weekStart, viewMode]);
 
   // Refetch when month changes
   useEffect(() => {
     if (viewMode !== 'month') return;
-    if (month === initialMonth) {
-      setLogs(initialLogs);
-    } else {
-      fetchLogs([month]);
-    }
+    fetchLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, viewMode]);
 
@@ -208,15 +203,44 @@ export function CalendarView({ initialMonth, initialLogs, todayStr }: Props) {
     setLogs(prev => prev.filter(l => l.id !== id));
   }
 
+  const pullupDeferDates = useMemo(
+    () => Array.from(new Set(
+      logs
+        .filter(l => l.type === 'PULLUP' && l.value === 'DEFERRED')
+        .map(l => l.date)
+    )),
+    [logs]
+  );
+  const pushupDeferDates = useMemo(
+    () => Array.from(new Set(
+      logs
+        .filter(l => l.type === 'PUSHUP' && l.value === 'DEFERRED')
+        .map(l => l.date)
+    )),
+    [logs]
+  );
+
   const weekDays = useMemo(() => {
     if (viewMode !== 'week') return [];
-    return getWeekDates(weekStart).map(d => buildDayInfo(d, logs, todayStr));
-  }, [weekStart, logs, todayStr, viewMode]);
+    return getWeekDates(weekStart).map(d => buildDayInfo(
+      d,
+      logs,
+      todayStr,
+      pullupDeferDates,
+      pushupDeferDates
+    ));
+  }, [weekStart, logs, todayStr, viewMode, pullupDeferDates, pushupDeferDates]);
 
   const selectedDayInfo = useMemo(() => {
     if (!selectedDay) return null;
-    return buildDayInfo(selectedDay, logs, todayStr);
-  }, [selectedDay, logs, todayStr]);
+    return buildDayInfo(
+      selectedDay,
+      logs,
+      todayStr,
+      pullupDeferDates,
+      pushupDeferDates
+    );
+  }, [selectedDay, logs, todayStr, pullupDeferDates, pushupDeferDates]);
 
   const isCurrentWeek = weekStart === getWeekStart(todayStr);
   const isCurrentMonth = month === todayStr.substring(0, 7);
@@ -295,6 +319,8 @@ export function CalendarView({ initialMonth, initialLogs, todayStr }: Props) {
             month={month}
             logs={logs}
             todayStr={todayStr}
+            pullupDeferDates={pullupDeferDates}
+            pushupDeferDates={pushupDeferDates}
             selectedDay={selectedDay}
             onDayClick={setSelectedDay}
           />
@@ -377,12 +403,16 @@ function MonthGrid({
   month,
   logs,
   todayStr,
+  pullupDeferDates,
+  pushupDeferDates,
   selectedDay,
   onDayClick,
 }: {
   month: string;
   logs: FitnessLog[];
   todayStr: string;
+  pullupDeferDates: string[];
+  pushupDeferDates: string[];
   selectedDay: string | null;
   onDayClick: (dateStr: string) => void;
 }) {
@@ -414,7 +444,13 @@ function MonthGrid({
         {Array.from({ length: daysInMonth }).map((_, i) => {
           const dayNum = i + 1;
           const dateStr = `${month}-${String(dayNum).padStart(2, '0')}`;
-          const dayInfo = buildDayInfo(dateStr, logs, todayStr);
+          const dayInfo = buildDayInfo(
+            dateStr,
+            logs,
+            todayStr,
+            pullupDeferDates,
+            pushupDeferDates
+          );
           const typeStyle = TYPE_STYLES[dayInfo.plan.type] || TYPE_STYLES.RECOVERY;
           const overall = dayInfo.isFuture ? null : getOverallStatus(dayInfo.status);
           const isSelected = selectedDay === dateStr;

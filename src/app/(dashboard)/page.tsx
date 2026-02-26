@@ -30,8 +30,10 @@ export default async function TodayPage() {
     todayWeight,
     todayPullupSets,
     todayPullupTotal,
+    todayPullupDeferred,
     todayPushupSets,
     todayPushupTotal,
+    todayPushupDeferred,
     todayCarries,
     lastPullupAt,
     lastPushupAt,
@@ -84,6 +86,7 @@ export default async function TodayPage() {
         todayStr={todayStr}
         todaySets={todayPullupSets}
         todayTotal={todayPullupTotal}
+        deferredToday={todayPullupDeferred}
         lastSetAt={lastPullupAt}
       />
 
@@ -92,6 +95,7 @@ export default async function TodayPage() {
         todayStr={todayStr}
         todaySets={todayPushupSets}
         todayTotal={todayPushupTotal}
+        deferredToday={todayPushupDeferred}
         lastSetAt={lastPushupAt}
       />
 
