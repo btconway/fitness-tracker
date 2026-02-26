@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
 import { getCycleDay, getCycleWeek, PROGRAM_START, getWeekStart, getWeekDates, formatDate } from '@/lib/date';
-import { getFullPlanForDay, getFighterPullupDay, getFighterPushupDay } from '@/lib/program';
+import { getFullPlanForDay, getFighterPullupDay, getFighterPushupDay, isSupplementaryDay, SUPPLEMENTARY_PRESCRIPTION } from '@/lib/program';
 import type { FitnessLog } from '@/lib/types';
 import type { DayPlan } from '@/lib/program';
 import { DayDetail } from './DayDetail';
@@ -23,11 +23,13 @@ const TYPE_STYLES: Record<string, { border: string; bg: string; text: string; la
   RECOVERY: { border: 'border-l-slate-400', bg: 'bg-slate-50', text: 'text-slate-500', label: 'Rest' },
 };
 
-const STATUS_ITEMS: { key: keyof DayStatus; label: string }[] = [
+const STATUS_ITEMS: { key: keyof DayStatus; label: string; supplementaryOnly?: boolean }[] = [
   { key: 'workout', label: 'WO' },
   { key: 'steps', label: 'Steps' },
   { key: 'pullups', label: 'PU' },
   { key: 'pushups', label: 'Push' },
+  { key: 'swings', label: 'SW', supplementaryOnly: true },
+  { key: 'rows', label: 'Row', supplementaryOnly: true },
   { key: 'weight', label: 'Wt' },
 ];
 
@@ -80,7 +82,21 @@ function computeDayStatus(
     .flatMap(l => l.pushup_sets ? l.pushup_sets.split(',').map(s => parseInt(s.trim())) : []);
   const pushups = computeSetStatus(pushupDay.sets, pushupSets, pushupDay.rest);
 
-  return { workout, steps, pullups, pushups, weight };
+  let swings: Status = 'done';
+  let rows: Status = 'done';
+  if (isSupplementaryDay(plan.type)) {
+    const swingSets = dayLogs
+      .filter(l => l.type === 'SWING')
+      .flatMap(l => l.swing_sets ? l.swing_sets.split(',').map(s => parseInt(s.trim())) : []);
+    swings = computeSetStatus(SUPPLEMENTARY_PRESCRIPTION.swingSets, swingSets, false);
+
+    const rowSets = dayLogs
+      .filter(l => l.type === 'ROW')
+      .flatMap(l => l.row_sets ? l.row_sets.split(',').map(s => parseInt(s.trim())) : []);
+    rows = computeSetStatus(SUPPLEMENTARY_PRESCRIPTION.rowSets, rowSets, false);
+  }
+
+  return { workout, steps, pullups, pushups, weight, swings, rows };
 }
 
 function buildDayInfo(
@@ -100,7 +116,7 @@ function buildDayInfo(
   const isToday = dateStr === todayStr;
   const isProgramActive = dateStr >= PROGRAM_START_STR;
   const status: DayStatus = isFuture
-    ? { workout: 'none', steps: 'none', pullups: 'none', pushups: 'none', weight: 'none' }
+    ? { workout: 'none', steps: 'none', pullups: 'none', pushups: 'none', weight: 'none', swings: 'none', rows: 'none' }
     : computeDayStatus(dayLogs, plan, pullupDay, pushupDay);
 
   return { date: dateStr, cycleDay, cycleWeek, plan, pullupDay, pushupDay, logs: dayLogs, status, isFuture, isToday, isProgramActive };
@@ -379,16 +395,18 @@ function DayCard({ day, onClick }: { day: DayInfo; onClick: () => void }) {
 
       {!day.isFuture && day.isProgramActive ? (
         <div className="flex gap-3">
-          {STATUS_ITEMS.map(({ key, label }) => {
-            const s = day.status[key];
-            const color = s === 'done' ? 'bg-emerald-500' : s === 'partial' ? 'bg-amber-400' : 'bg-red-300';
-            return (
-              <div key={key} className="flex items-center gap-1">
-                <div className={`w-2 h-2 rounded-full ${color}`} />
-                <span className="text-[10px] text-slate-400">{label}</span>
-              </div>
-            );
-          })}
+          {STATUS_ITEMS
+            .filter(item => !item.supplementaryOnly || isSupplementaryDay(day.plan.type))
+            .map(({ key, label }) => {
+              const s = day.status[key];
+              const color = s === 'done' ? 'bg-emerald-500' : s === 'partial' ? 'bg-amber-400' : 'bg-red-300';
+              return (
+                <div key={key} className="flex items-center gap-1">
+                  <div className={`w-2 h-2 rounded-full ${color}`} />
+                  <span className="text-[10px] text-slate-400">{label}</span>
+                </div>
+              );
+            })}
         </div>
       ) : day.isFuture && day.isProgramActive ? (
         <span className="text-[10px] text-slate-400 italic">Upcoming</span>

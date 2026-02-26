@@ -20,6 +20,8 @@ export function LogSheet({ defaultDate }: Props) {
   const [weight, setWeight] = useState('');
   const [pullupSets, setPullupSets] = useState('');
   const [pushupSets, setPushupSets] = useState('');
+  const [swingSets, setSwingSets] = useState('');
+  const [rowSets, setRowSets] = useState('');
   const [bellSize, setBellSize] = useState<BellSize | null>(null);
   const [secondaryBellSize, setSecondaryBellSize] = useState<BellSize | null>(null);
   const [secondaryRounds, setSecondaryRounds] = useState('');
@@ -32,6 +34,8 @@ export function LogSheet({ defaultDate }: Props) {
     setWeight('');
     setPullupSets('');
     setPushupSets('');
+    setSwingSets('');
+    setRowSets('');
     setBellSize(null);
     setSecondaryBellSize(null);
     setSecondaryRounds('');
@@ -59,7 +63,10 @@ export function LogSheet({ defaultDate }: Props) {
         : type === 'STEPS' ? steps
         : type === 'WEIGHT' ? weight
         : type === 'PULLUP' ? pullupSets
-        : pushupSets,
+        : type === 'PUSHUP' ? pushupSets
+        : type === 'SWING' ? swingSets
+        : type === 'ROW' ? rowSets
+        : '',
       note: note || null,
     };
 
@@ -71,6 +78,8 @@ export function LogSheet({ defaultDate }: Props) {
     }
     if (type === 'PULLUP' && pullupSets) payload.pullup_sets = pullupSets;
     if (type === 'PUSHUP' && pushupSets) payload.pushup_sets = pushupSets;
+    if (type === 'SWING' && swingSets) { payload.swing_sets = swingSets; payload.bell_size = '28 kg'; }
+    if (type === 'ROW' && rowSets) { payload.row_sets = rowSets; payload.bell_size = '24 kg'; }
 
     try {
       const res = await fetch('/api/log', {
@@ -131,6 +140,8 @@ export function LogSheet({ defaultDate }: Props) {
                 <option value="WEIGHT">Weight</option>
                 <option value="PULLUP">Pull-ups</option>
                 <option value="PUSHUP">Push-ups</option>
+                <option value="SWING">KB Swings</option>
+                <option value="ROW">KB Rows</option>
               </select>
             </div>
           </div>
@@ -269,6 +280,36 @@ export function LogSheet({ defaultDate }: Props) {
                 required
               />
               <p className="text-[10px] text-slate-400 mt-1">Comma-separated reps per set</p>
+            </div>
+          )}
+
+          {type === 'SWING' && (
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Swing Sets</label>
+              <input
+                type="text"
+                value={swingSets}
+                onChange={e => setSwingSets(e.target.value)}
+                placeholder="25,25,25"
+                className={inputClass}
+                required
+              />
+              <p className="text-[10px] text-slate-400 mt-1">Comma-separated reps per set (28 kg)</p>
+            </div>
+          )}
+
+          {type === 'ROW' && (
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Row Sets</label>
+              <input
+                type="text"
+                value={rowSets}
+                onChange={e => setRowSets(e.target.value)}
+                placeholder="10,10,10"
+                className={inputClass}
+                required
+              />
+              <p className="text-[10px] text-slate-400 mt-1">Comma-separated reps per set, per arm (24 kg)</p>
             </div>
           )}
 

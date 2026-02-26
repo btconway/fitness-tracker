@@ -8,9 +8,11 @@ interface Props {
   pullups: Status;
   pushups: Status;
   weight: Status;
+  swings?: Status;
+  rows?: Status;
 }
 
-const items: { key: keyof Props; label: string }[] = [
+const BASE_ITEMS: { key: keyof Props; label: string }[] = [
   { key: 'workout', label: 'Workout' },
   { key: 'steps', label: 'Steps' },
   { key: 'pullups', label: 'Pullups' },
@@ -25,10 +27,14 @@ const statusStyles: Record<Status, { bg: string; text: string; icon: string }> =
 };
 
 export function TodayProgress(props: Props) {
+  const items = [...BASE_ITEMS];
+  if (props.swings !== undefined) items.push({ key: 'swings', label: 'Swings' });
+  if (props.rows !== undefined) items.push({ key: 'rows', label: 'Rows' });
+
   return (
     <div className="flex gap-2 overflow-x-auto py-1">
       {items.map(({ key, label }) => {
-        const status = props[key];
+        const status = props[key] ?? 'none';
         const style = statusStyles[status];
         return (
           <div

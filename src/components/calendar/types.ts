@@ -9,6 +9,8 @@ export interface DayStatus {
   pullups: Status;
   pushups: Status;
   weight: Status;
+  swings: Status;
+  rows: Status;
 }
 
 export interface DayInfo {

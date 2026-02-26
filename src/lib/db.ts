@@ -88,6 +88,20 @@ export async function initDb() {
     } catch {
       // Column might already exist, ignore error
     }
+
+    // Add swing_sets column if it doesn't exist (migration)
+    try {
+      await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS swing_sets TEXT`;
+    } catch {
+      // Column might already exist, ignore error
+    }
+
+    // Add row_sets column if it doesn't exist (migration)
+    try {
+      await sql`ALTER TABLE fitness_logs ADD COLUMN IF NOT EXISTS row_sets TEXT`;
+    } catch {
+      // Column might already exist, ignore error
+    }
   } catch (error) {
     console.error('Database initialization failed:', error);
     throw error;

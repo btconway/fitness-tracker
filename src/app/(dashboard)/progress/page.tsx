@@ -26,6 +26,8 @@ export default async function ProgressPage() {
     weightChange,
     lifetimePullups,
     lifetimePushups,
+    lifetimeSwings,
+    lifetimeRows,
   } = computeMetrics(logs);
 
   const roundsLogs = logs.filter(l => l.type === 'WORKOUT' && l.rounds);
@@ -67,6 +69,8 @@ export default async function ProgressPage() {
       <div className="grid grid-cols-2 gap-3">
         <StatCard label="Lifetime Pull-ups" value={lifetimePullups} color="text-indigo-600" />
         <StatCard label="Lifetime Push-ups" value={lifetimePushups} color="text-emerald-600" />
+        <StatCard label="Lifetime Swings" value={lifetimeSwings} color="text-rose-600" />
+        <StatCard label="Lifetime Rows" value={lifetimeRows} color="text-cyan-600" />
       </div>
 
       {/* Recent logs */}
@@ -100,6 +104,12 @@ export default async function ProgressPage() {
                 )}
                 {log.type === 'PUSHUP' && !log.pushup_sets && log.value === 'DEFERRED' && (
                   <span className="ml-2 text-slate-700">Deferred</span>
+                )}
+                {log.type === 'SWING' && log.swing_sets && (
+                  <span className="ml-2 text-slate-700">{log.swing_sets}</span>
+                )}
+                {log.type === 'ROW' && log.row_sets && (
+                  <span className="ml-2 text-slate-700">{log.row_sets}</span>
                 )}
               </div>
               <span className="text-[10px] text-slate-400 font-mono ml-2 shrink-0">{log.date}</span>

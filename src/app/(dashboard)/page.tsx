@@ -1,7 +1,10 @@
 import { getTodayContext } from '@/lib/data';
+import { isSupplementaryDay, SUPPLEMENTARY_PRESCRIPTION } from '@/lib/program';
 import { TodayWorkout } from '@/components/today/TodayWorkout';
 import { FighterPullup } from '@/components/today/FighterPullup';
 import { FighterPushup } from '@/components/today/FighterPushup';
+import { KBSwings } from '@/components/today/KBSwings';
+import { KBRows } from '@/components/today/KBRows';
 import { CarriesLogger } from '@/components/today/CarriesLogger';
 import { StepsLogger } from '@/components/today/StepsLogger';
 import { TodayProgress } from '@/components/today/TodayProgress';
@@ -37,6 +40,12 @@ export default async function TodayPage() {
     todayCarries,
     lastPullupAt,
     lastPushupAt,
+    lastSwingAt,
+    lastRowAt,
+    todaySwingSets,
+    todaySwingTotal,
+    todayRowSets,
+    todayRowTotal,
     lastWeight,
   } = ctx;
 
@@ -56,6 +65,10 @@ export default async function TodayPage() {
   const pullupStatus = pullupDay.rest ? 'done' : getSetStatus(pullupDay.sets, todayPullupSets);
   const pushupStatus = pushupDay.rest ? 'done' : getSetStatus(pushupDay.sets, todayPushupSets);
 
+  const showSupplementary = isSupplementaryDay(plan.type);
+  const swingStatus = showSupplementary ? getSetStatus(SUPPLEMENTARY_PRESCRIPTION.swingSets, todaySwingSets) : undefined;
+  const rowStatus = showSupplementary ? getSetStatus(SUPPLEMENTARY_PRESCRIPTION.rowSets, todayRowSets) : undefined;
+
   return (
     <div className="space-y-3">
       <TodayProgress
@@ -64,6 +77,8 @@ export default async function TodayPage() {
         pullups={pullupStatus}
         pushups={pushupStatus}
         weight={!!todayWeight ? 'done' : 'none'}
+        swings={swingStatus}
+        rows={rowStatus}
       />
 
       <TodayWorkout
@@ -79,6 +94,25 @@ export default async function TodayPage() {
           todayStr={todayStr}
           alreadyLogged={todayCarries}
         />
+      )}
+
+      {showSupplementary && (
+        <>
+          <KBSwings
+            todayStr={todayStr}
+            todaySets={todaySwingSets}
+            todayTotal={todaySwingTotal}
+            prescribedSets={SUPPLEMENTARY_PRESCRIPTION.swingSets}
+            lastSetAt={lastSwingAt}
+          />
+          <KBRows
+            todayStr={todayStr}
+            todaySets={todayRowSets}
+            todayTotal={todayRowTotal}
+            prescribedSets={SUPPLEMENTARY_PRESCRIPTION.rowSets}
+            lastSetAt={lastRowAt}
+          />
+        </>
       )}
 
       <FighterPullup

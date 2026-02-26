@@ -222,6 +222,17 @@ export function getFullPlanForDay(cycleDay: number): DayPlan {
   return ABF4FL_PROGRAM[idx];
 }
 
+// ---- Supplementary KB Work (off-day only) ----
+
+export const SUPPLEMENTARY_PRESCRIPTION = {
+  swingSets: [25, 25, 25] as number[],
+  rowSets: [10, 10, 10] as number[],
+};
+
+export function isSupplementaryDay(type: WorkoutType): boolean {
+  return type === 'WALK_MOVEMENT' || type === 'RUCK';
+}
+
 // ---- Fighter Pullup Program ----
 
 export interface PullupDay {

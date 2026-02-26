@@ -79,8 +79,22 @@ export async function getTodayContext() {
 
   const todayCarries = todayLogs.find(l => l.type === 'CARRIES') ?? null;
 
+  const todaySwings = todayLogs.filter(l => l.type === 'SWING');
+  const todaySwingSets = todaySwings.flatMap(l =>
+    l.swing_sets ? l.swing_sets.split(',').map(s => parseInt(s.trim())) : []
+  );
+  const todaySwingTotal = todaySwingSets.reduce((a, b) => a + b, 0);
+
+  const todayRows = todayLogs.filter(l => l.type === 'ROW');
+  const todayRowSets = todayRows.flatMap(l =>
+    l.row_sets ? l.row_sets.split(',').map(s => parseInt(s.trim())) : []
+  );
+  const todayRowTotal = todayRowSets.reduce((a, b) => a + b, 0);
+
   const lastPullupAt = todayPullups.find(l => !!l.pullup_sets)?.created_at ?? null;
   const lastPushupAt = todayPushups.find(l => !!l.pushup_sets)?.created_at ?? null;
+  const lastSwingAt = todaySwings.find(l => !!l.swing_sets)?.created_at ?? null;
+  const lastRowAt = todayRows.find(l => !!l.row_sets)?.created_at ?? null;
 
   // Last weight for placeholder
   const weightLogs = logs.filter(l => l.type === 'WEIGHT');
@@ -104,6 +118,12 @@ export async function getTodayContext() {
     todayCarries,
     lastPullupAt,
     lastPushupAt,
+    lastSwingAt,
+    lastRowAt,
+    todaySwingSets,
+    todaySwingTotal,
+    todayRowSets,
+    todayRowTotal,
     lastWeight,
     logs,
   };
@@ -116,6 +136,8 @@ export function computeMetrics(logs: FitnessLog[]) {
   const weightLogs = logs.filter(l => l.type === 'WEIGHT');
   const pullupLogs = logs.filter(l => l.type === 'PULLUP');
   const pushupLogs = logs.filter(l => l.type === 'PUSHUP');
+  const swingLogs = logs.filter(l => l.type === 'SWING');
+  const rowLogs = logs.filter(l => l.type === 'ROW');
 
   const totalWorkouts = workoutLogs.length;
 
@@ -155,6 +177,16 @@ export function computeMetrics(logs: FitnessLog[]) {
     return acc + sets.reduce((a, b) => a + b, 0);
   }, 0);
 
+  const lifetimeSwings = swingLogs.reduce((acc, l) => {
+    const sets = l.swing_sets ? l.swing_sets.split(',').map(s => parseInt(s.trim())) : [];
+    return acc + sets.reduce((a, b) => a + b, 0);
+  }, 0);
+
+  const lifetimeRows = rowLogs.reduce((acc, l) => {
+    const sets = l.row_sets ? l.row_sets.split(',').map(s => parseInt(s.trim())) : [];
+    return acc + sets.reduce((a, b) => a + b, 0);
+  }, 0);
+
   return {
     totalWorkouts,
     averageRounds,
@@ -167,6 +199,8 @@ export function computeMetrics(logs: FitnessLog[]) {
     recentRounds,
     lifetimePullups,
     lifetimePushups,
+    lifetimeSwings,
+    lifetimeRows,
   };
 }
 
