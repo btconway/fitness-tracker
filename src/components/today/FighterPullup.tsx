@@ -58,6 +58,10 @@ export function FighterPullup({
   const completedIndices = getCompletedSetIndices(pullupDay.sets, todaySets);
   const allDone = pullupDay.sets.length > 0 && completedIndices.size === pullupDay.sets.length;
   const completedReps = todaySets.reduce((a, b) => a + b, 0);
+  const remainingReps = pullupDay.sets.reduce(
+    (sum, reps, index) => sum + (completedIndices.has(index) ? 0 : reps),
+    0
+  );
 
   async function handleLogSet(reps: number) {
     if (isLogging) return;
@@ -214,9 +218,9 @@ export function FighterPullup({
       )}
 
       {/* Progress text */}
-      {todaySets.length > 0 && !allDone && (
+      {!allDone && (
         <p className="text-xs text-indigo-600 font-medium text-center mb-2">
-          {completedIndices.size}/{pullupDay.sets.length} sets done ({completedReps} reps)
+          {completedIndices.size}/{pullupDay.sets.length} sets done ({completedReps} reps) • {remainingReps} reps remaining
         </p>
       )}
 
