@@ -25,6 +25,7 @@ export default async function TodayPage() {
 
   const {
     todayStr,
+    cycleDay,
     plan,
     pullupDay,
     pushupDay,
@@ -65,7 +66,7 @@ export default async function TodayPage() {
   const pullupStatus = pullupDay.rest ? 'done' : getSetStatus(pullupDay.sets, todayPullupSets);
   const pushupStatus = pushupDay.rest ? 'done' : getSetStatus(pushupDay.sets, todayPushupSets);
 
-  const showSupplementary = isSupplementaryDay(plan.type);
+  const showSupplementary = isSupplementaryDay(cycleDay);
   const swingStatus = showSupplementary ? getSetStatus(SUPPLEMENTARY_PRESCRIPTION.swingSets, todaySwingSets) : undefined;
   const rowStatus = showSupplementary ? getSetStatus(SUPPLEMENTARY_PRESCRIPTION.rowSets, todayRowSets) : undefined;
 

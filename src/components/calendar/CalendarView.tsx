@@ -65,6 +65,7 @@ function computeDayStatus(
   plan: DayPlan,
   pullupDay: { sets: number[]; rest: boolean },
   pushupDay: { sets: number[]; rest: boolean },
+  cycleDay: number,
 ): DayStatus {
   const isRecovery = plan.type === 'RECOVERY';
   const hasWorkoutLog = dayLogs.some(l => l.type === 'WORKOUT' || l.type === 'CARRIES');
@@ -84,7 +85,7 @@ function computeDayStatus(
 
   let swings: Status = 'done';
   let rows: Status = 'done';
-  if (isSupplementaryDay(plan.type)) {
+  if (isSupplementaryDay(cycleDay)) {
     const swingSets = dayLogs
       .filter(l => l.type === 'SWING')
       .flatMap(l => l.swing_sets ? l.swing_sets.split(',').map(s => parseInt(s.trim())) : []);
@@ -117,7 +118,7 @@ function buildDayInfo(
   const isProgramActive = dateStr >= PROGRAM_START_STR;
   const status: DayStatus = isFuture
     ? { workout: 'none', steps: 'none', pullups: 'none', pushups: 'none', weight: 'none', swings: 'none', rows: 'none' }
-    : computeDayStatus(dayLogs, plan, pullupDay, pushupDay);
+    : computeDayStatus(dayLogs, plan, pullupDay, pushupDay, cycleDay);
 
   return { date: dateStr, cycleDay, cycleWeek, plan, pullupDay, pushupDay, logs: dayLogs, status, isFuture, isToday, isProgramActive };
 }
@@ -396,7 +397,7 @@ function DayCard({ day, onClick }: { day: DayInfo; onClick: () => void }) {
       {!day.isFuture && day.isProgramActive ? (
         <div className="flex gap-3">
           {STATUS_ITEMS
-            .filter(item => !item.supplementaryOnly || isSupplementaryDay(day.plan.type))
+            .filter(item => !item.supplementaryOnly || isSupplementaryDay(day.cycleDay))
             .map(({ key, label }) => {
               const s = day.status[key];
               const color = s === 'done' ? 'bg-emerald-500' : s === 'partial' ? 'bg-amber-400' : 'bg-red-300';

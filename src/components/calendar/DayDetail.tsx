@@ -164,7 +164,7 @@ export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
           )}
 
           {/* Supplementary KB Work */}
-          {isSupplementaryDay(plan.type) && (
+          {isSupplementaryDay(dayInfo.cycleDay) && (
             <>
               <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 mb-2">
                 <p className="text-xs font-semibold text-rose-700">KB Swings (28 kg)</p>

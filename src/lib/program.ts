@@ -222,15 +222,17 @@ export function getFullPlanForDay(cycleDay: number): DayPlan {
   return ABF4FL_PROGRAM[idx];
 }
 
-// ---- Supplementary KB Work (off-day only) ----
+// ---- Supplementary KB Work (Mon/Fri lifting days) ----
 
 export const SUPPLEMENTARY_PRESCRIPTION = {
   swingSets: [25, 25, 25] as number[],
   rowSets: [10, 10, 10] as number[],
 };
 
-export function isSupplementaryDay(type: WorkoutType): boolean {
-  return type === 'WALK_MOVEMENT' || type === 'RUCK';
+/** Supplementary swings/rows on Monday (day 1) and Friday (day 5) of each 7-day cycle week */
+export function isSupplementaryDay(cycleDay: number): boolean {
+  const dayInWeek = ((cycleDay - 1) % 7) + 1;
+  return dayInWeek === 1 || dayInWeek === 5;
 }
 
 // ---- Fighter Pullup Program ----
