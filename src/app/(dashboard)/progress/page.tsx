@@ -1,4 +1,7 @@
 import { fetchAllLogs, computeMetrics } from '@/lib/data';
+import { computeGoalStatus } from '@/lib/goals';
+import { getTodayCST } from '@/lib/date';
+import { GoalDashboard } from '@/components/progress/GoalDashboard';
 import { StatCard } from '@/components/progress/StatCard';
 import { WeightChart } from '@/components/progress/WeightChart';
 import { RoundsChart } from '@/components/progress/RoundsChart';
@@ -30,11 +33,16 @@ export default async function ProgressPage() {
     lifetimeRows,
   } = computeMetrics(logs);
 
+  const goalSummary = computeGoalStatus(logs, getTodayCST());
+
   const roundsLogs = logs.filter(l => l.type === 'WORKOUT' && l.rounds);
   const recentLogs = logs.slice(0, 20);
 
   return (
     <div className="space-y-4">
+      {/* Goal dashboard */}
+      <GoalDashboard summary={goalSummary} />
+
       {/* Stat grid */}
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard label="Streak" value={streak} subtitle="days" color="text-blue-600" />
@@ -54,8 +62,8 @@ export default async function ProgressPage() {
               </span>
               <span className="text-xs text-slate-500">
                 {weightChange > 0 ? '+' : ''}{weightChange.toFixed(1)} lbs since start
-                {latestWeight > 190 && (
-                  <span className="text-emerald-600 ml-1">({(latestWeight - 190).toFixed(1)} to goal)</span>
+                {latestWeight > 192 && (
+                  <span className="text-emerald-600 ml-1">({(latestWeight - 192).toFixed(1)} to goal)</span>
                 )}
               </span>
             </div>

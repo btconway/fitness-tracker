@@ -1,6 +1,7 @@
 import { sql, isDatabaseConfigured } from '@/lib/db';
-import { serializeDate, serializeTimestamp, getTodayCST, getNowCST, getCycleDay, PROGRAM_START } from '@/lib/date';
+import { serializeDate, serializeTimestamp, getTodayCST, getNowCST, getCycleDay, getCycleWeek, PROGRAM_START } from '@/lib/date';
 import { getFullPlanForDay, getFighterPullupDay, getFighterPushupDay } from '@/lib/program';
+import { getBellPrescription } from '@/lib/goals';
 import type { FitnessLog } from '@/lib/types';
 
 /** Fetch all logs, serialized and sorted by date DESC */
@@ -96,6 +97,12 @@ export async function getTodayContext() {
   const lastSwingAt = todaySwings.find(l => !!l.swing_sets)?.created_at ?? null;
   const lastRowAt = todayRows.find(l => !!l.row_sets)?.created_at ?? null;
 
+  // Bell prescription for volume days (Wed/Fri AB Complex in weeks 1-3)
+  const cycleWeek = getCycleWeek(cycleDay);
+  const dayInWeek = ((cycleDay - 1) % 7) + 1;
+  const isVolumeDay = (dayInWeek === 3 || dayInWeek === 5) && cycleWeek <= 3;
+  const bellPrescription = isVolumeDay ? getBellPrescription(todayStr) : null;
+
   // Last weight for placeholder
   const weightLogs = logs.filter(l => l.type === 'WEIGHT');
   const lastWeight = weightLogs.length > 0 ? parseFloat(weightLogs[0].value) : null;
@@ -124,6 +131,7 @@ export async function getTodayContext() {
     todaySwingTotal,
     todayRowSets,
     todayRowTotal,
+    bellPrescription,
     lastWeight,
     logs,
   };

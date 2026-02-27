@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import type { DayPlan } from '@/lib/program';
+import type { BellPrescription } from '@/lib/goals';
 import { BELL_SIZES, type BellSize } from '@/lib/types';
 
 const TYPE_COLORS: Record<string, string> = {
@@ -18,9 +19,10 @@ interface Props {
   plan: DayPlan;
   todayStr: string;
   alreadyLogged: boolean;
+  bellPrescription?: BellPrescription | null;
 }
 
-export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
+export function TodayWorkout({ plan, todayStr, alreadyLogged, bellPrescription }: Props) {
   const router = useRouter();
   const [selectedRounds, setSelectedRounds] = useState<number | null>(null);
   const [isLogging, setIsLogging] = useState(false);
@@ -110,12 +112,26 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
         </ul>
       )}
 
-      {/* Round guidance */}
-      {hasRounds && (
+      {/* Round guidance / Bell prescription */}
+      {hasRounds && bellPrescription ? (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 mb-3">
+          <p className="text-[10px] font-semibold text-blue-700 uppercase tracking-wide mb-1">Today&apos;s Prescription</p>
+          <p className="text-sm font-semibold text-blue-900">
+            {bellPrescription.heavyRounds} rounds @ {bellPrescription.heavyBell}
+            {bellPrescription.lightRounds > 0 && (
+              <> + {bellPrescription.lightRounds} rounds @ {bellPrescription.lightBell}</>
+            )}
+            {' '}= {bellPrescription.totalRounds} total
+          </p>
+          <p className="text-[10px] text-blue-600 mt-0.5">
+            Week {bellPrescription.weekNumber} of 8 toward 10 rounds @ {bellPrescription.heavyBell}
+          </p>
+        </div>
+      ) : hasRounds ? (
         <p className="text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 mb-3">
           Repeat {minR}-{maxR} rounds
         </p>
-      )}
+      ) : null}
 
       {plan.carries && (
         <p className="text-xs text-slate-600 bg-zinc-50 rounded-lg px-3 py-2 mb-3">

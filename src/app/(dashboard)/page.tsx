@@ -47,6 +47,7 @@ export default async function TodayPage() {
     todaySwingTotal,
     todayRowSets,
     todayRowTotal,
+    bellPrescription,
     lastWeight,
   } = ctx;
 
@@ -88,6 +89,7 @@ export default async function TodayPage() {
             plan={plan}
             todayStr={todayStr}
             alreadyLogged={!!todayWorkout}
+            bellPrescription={bellPrescription}
           />
 
           {plan.carryType && plan.carries && (

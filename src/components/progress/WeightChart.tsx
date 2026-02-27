@@ -11,7 +11,7 @@ export function WeightChart({ weightLogs }: Props) {
   const weights = entries.map(l => parseFloat(l.value)).filter(w => !isNaN(w));
   if (weights.length === 0) return null;
 
-  const goal = 190;
+  const goal = 192;
   const minW = Math.min(Math.min(...weights), goal);
   const maxW = Math.max(...weights);
   const range = maxW - minW || 10;
