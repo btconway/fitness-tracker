@@ -20,7 +20,6 @@ export async function POST(req: NextRequest) {
       pullup_sets,
       pushup_sets,
       swing_sets,
-      row_sets,
       bell_size,
       secondary_bell_size,
       secondary_rounds,
@@ -55,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     await initDb();
-    await sql`INSERT INTO fitness_logs (date, type, value, rounds, pullup_sets, pushup_sets, swing_sets, row_sets, bell_size, secondary_bell_size, secondary_rounds, note) VALUES (${date}, ${type}, ${value}, ${rounds || null}, ${pullup_sets || null}, ${pushup_sets || null}, ${swing_sets || null}, ${row_sets || null}, ${bell_size || null}, ${hasSecondaryBell ? secondary_bell_size : null}, ${normalizedSecondaryRounds}, ${note})`;
+    await sql`INSERT INTO fitness_logs (date, type, value, rounds, pullup_sets, pushup_sets, swing_sets, bell_size, secondary_bell_size, secondary_rounds, note) VALUES (${date}, ${type}, ${value}, ${rounds || null}, ${pullup_sets || null}, ${pushup_sets || null}, ${swing_sets || null}, ${bell_size || null}, ${hasSecondaryBell ? secondary_bell_size : null}, ${normalizedSecondaryRounds}, ${note})`;
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

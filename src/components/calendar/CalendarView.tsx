@@ -29,7 +29,6 @@ const STATUS_ITEMS: { key: keyof DayStatus; label: string; supplementaryOnly?: b
   { key: 'pullups', label: 'PU' },
   { key: 'pushups', label: 'Push' },
   { key: 'swings', label: 'SW', supplementaryOnly: true },
-  { key: 'rows', label: 'Row', supplementaryOnly: true },
   { key: 'weight', label: 'Wt' },
 ];
 
@@ -84,20 +83,14 @@ function computeDayStatus(
   const pushups = computeSetStatus(pushupDay.sets, pushupSets, pushupDay.rest);
 
   let swings: Status = 'done';
-  let rows: Status = 'done';
   if (isSupplementaryDay(cycleDay)) {
     const swingSets = dayLogs
       .filter(l => l.type === 'SWING')
       .flatMap(l => l.swing_sets ? l.swing_sets.split(',').map(s => parseInt(s.trim())) : []);
     swings = computeSetStatus(SUPPLEMENTARY_PRESCRIPTION.swingSets, swingSets, false);
-
-    const rowSets = dayLogs
-      .filter(l => l.type === 'ROW')
-      .flatMap(l => l.row_sets ? l.row_sets.split(',').map(s => parseInt(s.trim())) : []);
-    rows = computeSetStatus(SUPPLEMENTARY_PRESCRIPTION.rowSets, rowSets, false);
   }
 
-  return { workout, steps, pullups, pushups, weight, swings, rows };
+  return { workout, steps, pullups, pushups, weight, swings };
 }
 
 function buildDayInfo(
@@ -117,7 +110,7 @@ function buildDayInfo(
   const isToday = dateStr === todayStr;
   const isProgramActive = dateStr >= PROGRAM_START_STR;
   const status: DayStatus = isFuture
-    ? { workout: 'none', steps: 'none', pullups: 'none', pushups: 'none', weight: 'none', swings: 'none', rows: 'none' }
+    ? { workout: 'none', steps: 'none', pullups: 'none', pushups: 'none', weight: 'none', swings: 'none' }
     : computeDayStatus(dayLogs, plan, pullupDay, pushupDay, cycleDay);
 
   return { date: dateStr, cycleDay, cycleWeek, plan, pullupDay, pushupDay, logs: dayLogs, status, isFuture, isToday, isProgramActive };

@@ -86,16 +86,9 @@ export async function getTodayContext() {
   );
   const todaySwingTotal = todaySwingSets.reduce((a, b) => a + b, 0);
 
-  const todayRows = todayLogs.filter(l => l.type === 'ROW');
-  const todayRowSets = todayRows.flatMap(l =>
-    l.row_sets ? l.row_sets.split(',').map(s => parseInt(s.trim())) : []
-  );
-  const todayRowTotal = todayRowSets.reduce((a, b) => a + b, 0);
-
   const lastPullupAt = todayPullups.find(l => !!l.pullup_sets)?.created_at ?? null;
   const lastPushupAt = todayPushups.find(l => !!l.pushup_sets)?.created_at ?? null;
   const lastSwingAt = todaySwings.find(l => !!l.swing_sets)?.created_at ?? null;
-  const lastRowAt = todayRows.find(l => !!l.row_sets)?.created_at ?? null;
 
   // Bell prescription for volume days (Wed/Fri) and quality days (Mon) in weeks 1-3
   const cycleWeek = getCycleWeek(cycleDay);
@@ -131,11 +124,8 @@ export async function getTodayContext() {
     lastPullupAt,
     lastPushupAt,
     lastSwingAt,
-    lastRowAt,
     todaySwingSets,
     todaySwingTotal,
-    todayRowSets,
-    todayRowTotal,
     bellPrescription,
     lastWeight,
     logs,
@@ -150,7 +140,6 @@ export function computeMetrics(logs: FitnessLog[]) {
   const pullupLogs = logs.filter(l => l.type === 'PULLUP');
   const pushupLogs = logs.filter(l => l.type === 'PUSHUP');
   const swingLogs = logs.filter(l => l.type === 'SWING');
-  const rowLogs = logs.filter(l => l.type === 'ROW');
 
   const totalWorkouts = workoutLogs.length;
 
@@ -195,11 +184,6 @@ export function computeMetrics(logs: FitnessLog[]) {
     return acc + sets.reduce((a, b) => a + b, 0);
   }, 0);
 
-  const lifetimeRows = rowLogs.reduce((acc, l) => {
-    const sets = l.row_sets ? l.row_sets.split(',').map(s => parseInt(s.trim())) : [];
-    return acc + sets.reduce((a, b) => a + b, 0);
-  }, 0);
-
   return {
     totalWorkouts,
     averageRounds,
@@ -213,7 +197,6 @@ export function computeMetrics(logs: FitnessLog[]) {
     lifetimePullups,
     lifetimePushups,
     lifetimeSwings,
-    lifetimeRows,
   };
 }
 

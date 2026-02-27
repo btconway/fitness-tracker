@@ -13,7 +13,6 @@ const TYPE_LABELS: Record<string, string> = {
   PULLUP: 'Pull-ups',
   PUSHUP: 'Push-ups',
   SWING: 'KB Swings',
-  ROW: 'KB Rows',
 };
 
 const TYPE_BADGE: Record<string, string> = {
@@ -24,7 +23,6 @@ const TYPE_BADGE: Record<string, string> = {
   PULLUP: 'bg-indigo-100 text-indigo-700',
   PUSHUP: 'bg-emerald-100 text-emerald-700',
   SWING: 'bg-rose-100 text-rose-700',
-  ROW: 'bg-cyan-100 text-cyan-700',
 };
 
 const WORKOUT_BORDER: Record<string, string> = {
@@ -172,12 +170,6 @@ export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
                   Sets: {SUPPLEMENTARY_PRESCRIPTION.swingSets.join(', ')} ({SUPPLEMENTARY_PRESCRIPTION.swingSets.reduce((a, b) => a + b, 0)} total)
                 </p>
               </div>
-              <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-3 mb-2">
-                <p className="text-xs font-semibold text-cyan-700">KB Rows (24 kg)</p>
-                <p className="text-xs text-cyan-600 mt-0.5">
-                  Sets: {SUPPLEMENTARY_PRESCRIPTION.rowSets.join(', ')} ({SUPPLEMENTARY_PRESCRIPTION.rowSets.reduce((a, b) => a + b, 0)} total/arm)
-                </p>
-              </div>
             </>
           )}
 
@@ -244,9 +236,6 @@ export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
                       )}
                       {log.type === 'SWING' && log.swing_sets && (
                         <span>Sets: {log.swing_sets} ({parseSetTotal(log.swing_sets)} total){log.bell_size ? ` · ${log.bell_size}` : ''}</span>
-                      )}
-                      {log.type === 'ROW' && log.row_sets && (
-                        <span>Sets: {log.row_sets} ({parseSetTotal(log.row_sets)} total/arm){log.bell_size ? ` · ${log.bell_size}` : ''}</span>
                       )}
                     </div>
                     {log.note && log.type !== 'CARRIES' && (

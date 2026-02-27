@@ -2,13 +2,12 @@ export interface FitnessLog {
   id: number;
   created_at: string;
   date: string;
-  type: 'WORKOUT' | 'STEPS' | 'WEIGHT' | 'PULLUP' | 'PUSHUP' | 'CARRIES' | 'SWING' | 'ROW';
+  type: 'WORKOUT' | 'STEPS' | 'WEIGHT' | 'PULLUP' | 'PUSHUP' | 'CARRIES' | 'SWING';
   value: string;
   rounds: number | null;
   pullup_sets: string | null;
   pushup_sets: string | null;
   swing_sets: string | null;
-  row_sets: string | null;
   bell_size: string | null;
   secondary_bell_size: string | null;
   secondary_rounds: number | null;

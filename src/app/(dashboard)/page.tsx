@@ -4,7 +4,6 @@ import { TodayWorkout } from '@/components/today/TodayWorkout';
 import { FighterPullup } from '@/components/today/FighterPullup';
 import { FighterPushup } from '@/components/today/FighterPushup';
 import { KBSwings } from '@/components/today/KBSwings';
-import { KBRows } from '@/components/today/KBRows';
 import { CarriesLogger } from '@/components/today/CarriesLogger';
 import { StepsLogger } from '@/components/today/StepsLogger';
 import { TodayProgress } from '@/components/today/TodayProgress';
@@ -42,11 +41,8 @@ export default async function TodayPage() {
     lastPullupAt,
     lastPushupAt,
     lastSwingAt,
-    lastRowAt,
     todaySwingSets,
     todaySwingTotal,
-    todayRowSets,
-    todayRowTotal,
     bellPrescription,
     lastWeight,
   } = ctx;
@@ -69,7 +65,6 @@ export default async function TodayPage() {
 
   const showSupplementary = isSupplementaryDay(cycleDay);
   const swingStatus = showSupplementary ? getSetStatus(SUPPLEMENTARY_PRESCRIPTION.swingSets, todaySwingSets) : undefined;
-  const rowStatus = showSupplementary ? getSetStatus(SUPPLEMENTARY_PRESCRIPTION.rowSets, todayRowSets) : undefined;
 
   return (
     <div className="space-y-4">
@@ -80,7 +75,6 @@ export default async function TodayPage() {
         pushups={pushupStatus}
         weight={!!todayWeight ? 'done' : 'none'}
         swings={swingStatus}
-        rows={rowStatus}
       />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,1fr)] xl:items-start">
@@ -102,22 +96,13 @@ export default async function TodayPage() {
           )}
 
           {showSupplementary && (
-            <div className="grid gap-4 lg:grid-cols-2">
-              <KBSwings
-                todayStr={todayStr}
-                todaySets={todaySwingSets}
-                todayTotal={todaySwingTotal}
-                prescribedSets={SUPPLEMENTARY_PRESCRIPTION.swingSets}
-                lastSetAt={lastSwingAt}
-              />
-              <KBRows
-                todayStr={todayStr}
-                todaySets={todayRowSets}
-                todayTotal={todayRowTotal}
-                prescribedSets={SUPPLEMENTARY_PRESCRIPTION.rowSets}
-                lastSetAt={lastRowAt}
-              />
-            </div>
+            <KBSwings
+              todayStr={todayStr}
+              todaySets={todaySwingSets}
+              todayTotal={todaySwingTotal}
+              prescribedSets={SUPPLEMENTARY_PRESCRIPTION.swingSets}
+              lastSetAt={lastSwingAt}
+            />
           )}
         </div>
 
