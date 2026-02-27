@@ -192,7 +192,7 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged }: Props) {
             </div>
             {secondaryBell && (
               <div className="flex gap-2 flex-wrap">
-                {roundOptions.map(r => (
+                {Array.from({ length: maxR }, (_, i) => i + 1).map(r => (
                   <button
                     key={r}
                     onClick={() => setSecondaryRounds(secondaryRounds === r ? null : r)}
