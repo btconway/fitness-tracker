@@ -1,7 +1,7 @@
 import { sql, isDatabaseConfigured } from '@/lib/db';
 import { serializeDate, serializeTimestamp, getTodayCST, getNowCST, getCycleDay, getCycleWeek, PROGRAM_START } from '@/lib/date';
 import { getFullPlanForDay, getFighterPullupDay, getFighterPushupDay } from '@/lib/program';
-import { getBellPrescription } from '@/lib/goals';
+import { getBellPrescription, getQualityDayPrescription } from '@/lib/goals';
 import type { FitnessLog } from '@/lib/types';
 
 /** Fetch all logs, serialized and sorted by date DESC */
@@ -97,11 +97,16 @@ export async function getTodayContext() {
   const lastSwingAt = todaySwings.find(l => !!l.swing_sets)?.created_at ?? null;
   const lastRowAt = todayRows.find(l => !!l.row_sets)?.created_at ?? null;
 
-  // Bell prescription for volume days (Wed/Fri AB Complex in weeks 1-3)
+  // Bell prescription for volume days (Wed/Fri) and quality days (Mon) in weeks 1-3
   const cycleWeek = getCycleWeek(cycleDay);
   const dayInWeek = ((cycleDay - 1) % 7) + 1;
   const isVolumeDay = (dayInWeek === 3 || dayInWeek === 5) && cycleWeek <= 3;
-  const bellPrescription = isVolumeDay ? getBellPrescription(todayStr) : null;
+  const isQualityDay = dayInWeek === 1 && cycleWeek <= 3;
+  const bellPrescription = isVolumeDay
+    ? getBellPrescription(todayStr)
+    : isQualityDay
+      ? getQualityDayPrescription(todayStr)
+      : null;
 
   // Last weight for placeholder
   const weightLogs = logs.filter(l => l.type === 'WEIGHT');

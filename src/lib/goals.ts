@@ -45,6 +45,29 @@ const BELL_SCHEDULE: Record<number, number> = {
 const BELL_SCHEDULE_FINAL = 10;
 
 /**
+ * Get the bell prescription for a Monday quality day (5 rounds all at 28 kg).
+ */
+export function getQualityDayPrescription(dateStr: string): BellPrescription | null {
+  const goalStart = new Date(`${GOAL_START_DATE}T00:00:00-06:00`);
+  const target = new Date(`${dateStr}T00:00:00-06:00`);
+
+  const diffMs = target.getTime() - goalStart.getTime();
+  if (diffMs < 0) return null;
+
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const weekNumber = Math.floor(diffDays / 7) + 1;
+
+  return {
+    heavyRounds: 5,
+    lightRounds: 0,
+    totalRounds: 5,
+    heavyBell: BELL_GOAL.targetBell,
+    lightBell: BELL_GOAL.baseBell,
+    weekNumber,
+  };
+}
+
+/**
  * Get the bell prescription for a given date.
  * Returns a prescription on volume days (Wed/Fri AB Complex in weeks 1-3 of cycle),
  * or null for non-volume days.

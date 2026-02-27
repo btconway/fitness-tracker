@@ -24,11 +24,30 @@ interface Props {
 
 export function TodayWorkout({ plan, todayStr, alreadyLogged, bellPrescription }: Props) {
   const router = useRouter();
-  const [selectedRounds, setSelectedRounds] = useState<number | null>(null);
   const [isLogging, setIsLogging] = useState(false);
-  const [selectedBell, setSelectedBell] = useState<BellSize | null>(null);
-  const [secondaryBell, setSecondaryBell] = useState<BellSize | null>(null);
-  const [secondaryRounds, setSecondaryRounds] = useState<number | null>(null);
+
+  // Pre-fill selectors from prescription when available
+  const hasMixedBells = bellPrescription ? bellPrescription.lightRounds > 0 : false;
+  const [selectedBell, setSelectedBell] = useState<BellSize | null>(
+    bellPrescription
+      ? hasMixedBells
+        ? (bellPrescription.lightBell as BellSize)
+        : (bellPrescription.heavyBell as BellSize)
+      : null
+  );
+  const [selectedRounds, setSelectedRounds] = useState<number | null>(
+    bellPrescription
+      ? hasMixedBells
+        ? bellPrescription.lightRounds
+        : bellPrescription.totalRounds
+      : null
+  );
+  const [secondaryBell, setSecondaryBell] = useState<BellSize | null>(
+    bellPrescription && hasMixedBells ? (bellPrescription.heavyBell as BellSize) : null
+  );
+  const [secondaryRounds, setSecondaryRounds] = useState<number | null>(
+    bellPrescription && hasMixedBells ? bellPrescription.heavyRounds : null
+  );
 
   const borderColor = TYPE_COLORS[plan.type] || 'border-l-slate-400';
   const hasRounds = plan.type === 'AB_COMPLEX' || plan.type === 'HYPERTROPHY_PRESS';
@@ -187,7 +206,9 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged, bellPrescription }
           </div>
           {/* Secondary (heavier) bell — optional */}
           <div className="border border-dashed border-zinc-300 rounded-lg p-3 mb-3">
-            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-2">Heavy bell (optional)</p>
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-2">
+              {bellPrescription ? '28 kg rounds' : 'Heavy bell (optional)'}
+            </p>
             <div className="flex gap-2 mb-2">
               {BELL_SIZES.map(size => (
                 <button
