@@ -32,7 +32,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-zinc-50">
       <Header />
-      <main className="max-w-lg mx-auto px-4 py-4 pb-24">
+      <main className="mx-auto w-full max-w-7xl px-4 py-4 pb-24 sm:px-6 lg:px-8 xl:px-10">
         {children}
       </main>
       <BottomNav />

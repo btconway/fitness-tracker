@@ -71,7 +71,7 @@ export default async function TodayPage() {
   const rowStatus = showSupplementary ? getSetStatus(SUPPLEMENTARY_PRESCRIPTION.rowSets, todayRowSets) : undefined;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <TodayProgress
         workout={!!todayWorkout ? 'done' : 'none'}
         steps={!!todaySteps ? 'done' : 'none'}
@@ -82,63 +82,69 @@ export default async function TodayPage() {
         rows={rowStatus}
       />
 
-      <TodayWorkout
-        plan={plan}
-        todayStr={todayStr}
-        alreadyLogged={!!todayWorkout}
-      />
-
-      {plan.carryType && plan.carries && (
-        <CarriesLogger
-          carryDescription={plan.carries}
-          carryType={plan.carryType}
-          todayStr={todayStr}
-          alreadyLogged={todayCarries}
-        />
-      )}
-
-      {showSupplementary && (
-        <>
-          <KBSwings
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,1fr)] xl:items-start">
+        <div className="space-y-4">
+          <TodayWorkout
+            plan={plan}
             todayStr={todayStr}
-            todaySets={todaySwingSets}
-            todayTotal={todaySwingTotal}
-            prescribedSets={SUPPLEMENTARY_PRESCRIPTION.swingSets}
-            lastSetAt={lastSwingAt}
+            alreadyLogged={!!todayWorkout}
           />
-          <KBRows
+
+          {plan.carryType && plan.carries && (
+            <CarriesLogger
+              carryDescription={plan.carries}
+              carryType={plan.carryType}
+              todayStr={todayStr}
+              alreadyLogged={todayCarries}
+            />
+          )}
+
+          {showSupplementary && (
+            <div className="grid gap-4 lg:grid-cols-2">
+              <KBSwings
+                todayStr={todayStr}
+                todaySets={todaySwingSets}
+                todayTotal={todaySwingTotal}
+                prescribedSets={SUPPLEMENTARY_PRESCRIPTION.swingSets}
+                lastSetAt={lastSwingAt}
+              />
+              <KBRows
+                todayStr={todayStr}
+                todaySets={todayRowSets}
+                todayTotal={todayRowTotal}
+                prescribedSets={SUPPLEMENTARY_PRESCRIPTION.rowSets}
+                lastSetAt={lastRowAt}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <FighterPullup
+            pullupDay={pullupDay}
             todayStr={todayStr}
-            todaySets={todayRowSets}
-            todayTotal={todayRowTotal}
-            prescribedSets={SUPPLEMENTARY_PRESCRIPTION.rowSets}
-            lastSetAt={lastRowAt}
+            todaySets={todayPullupSets}
+            todayTotal={todayPullupTotal}
+            deferredToday={todayPullupDeferred}
+            lastSetAt={lastPullupAt}
           />
-        </>
-      )}
 
-      <FighterPullup
-        pullupDay={pullupDay}
-        todayStr={todayStr}
-        todaySets={todayPullupSets}
-        todayTotal={todayPullupTotal}
-        deferredToday={todayPullupDeferred}
-        lastSetAt={lastPullupAt}
-      />
+          <FighterPushup
+            pushupDay={pushupDay}
+            todayStr={todayStr}
+            todaySets={todayPushupSets}
+            todayTotal={todayPushupTotal}
+            deferredToday={todayPushupDeferred}
+            lastSetAt={lastPushupAt}
+          />
 
-      <FighterPushup
-        pushupDay={pushupDay}
-        todayStr={todayStr}
-        todaySets={todayPushupSets}
-        todayTotal={todayPushupTotal}
-        deferredToday={todayPushupDeferred}
-        lastSetAt={lastPushupAt}
-      />
-
-      <StepsLogger
-        todayStr={todayStr}
-        alreadyLogged={!!todaySteps}
-        lastWeight={lastWeight}
-      />
+          <StepsLogger
+            todayStr={todayStr}
+            alreadyLogged={!!todaySteps}
+            lastWeight={lastWeight}
+          />
+        </div>
+      </div>
 
       <LogSheet defaultDate={todayStr} />
     </div>

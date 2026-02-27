@@ -36,41 +36,47 @@ export default async function ProgressPage() {
   return (
     <div className="space-y-4">
       {/* Stat grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard label="Streak" value={streak} subtitle="days" color="text-blue-600" />
         <StatCard label="Total Workouts" value={totalWorkouts} />
         <StatCard label="Avg Rounds" value={averageRounds} />
         <StatCard label="As Prescribed" value={`${prescribedPct}%`} subtitle="5+ rounds" />
       </div>
 
-      {/* Weight */}
-      <WeightChart weightLogs={weightLogs} />
-      {latestWeight && weightChange !== null && (
-        <div className="bg-white rounded-xl border border-zinc-200 p-3 flex items-center justify-between">
-          <span className="text-xs text-slate-600">
-            Current: <strong>{latestWeight.toFixed(1)} lbs</strong>
-          </span>
-          <span className="text-xs text-slate-500">
-            {weightChange > 0 ? '+' : ''}{weightChange.toFixed(1)} lbs since start
-            {latestWeight > 190 && (
-              <span className="text-emerald-600 ml-1">({(latestWeight - 190).toFixed(1)} to goal)</span>
-            )}
-          </span>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,1fr)] xl:items-start">
+        <div className="space-y-4">
+          {/* Weight */}
+          <WeightChart weightLogs={weightLogs} />
+          {latestWeight && weightChange !== null && (
+            <div className="bg-white rounded-xl border border-zinc-200 p-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-xs text-slate-600">
+                Current: <strong>{latestWeight.toFixed(1)} lbs</strong>
+              </span>
+              <span className="text-xs text-slate-500">
+                {weightChange > 0 ? '+' : ''}{weightChange.toFixed(1)} lbs since start
+                {latestWeight > 190 && (
+                  <span className="text-emerald-600 ml-1">({(latestWeight - 190).toFixed(1)} to goal)</span>
+                )}
+              </span>
+            </div>
+          )}
+
+          {/* Rounds */}
+          <RoundsChart roundsLogs={roundsLogs} />
         </div>
-      )}
 
-      {/* Rounds */}
-      <RoundsChart roundsLogs={roundsLogs} />
+        <div className="space-y-4">
+          {/* Bell progression */}
+          <BellProgressChart logs={logs} />
 
-      {/* Bell progression */}
-      <BellProgressChart logs={logs} />
-
-      {/* Lifetime totals */}
-      <div className="grid grid-cols-2 gap-3">
-        <StatCard label="Lifetime Pull-ups" value={lifetimePullups} color="text-indigo-600" />
-        <StatCard label="Lifetime Push-ups" value={lifetimePushups} color="text-emerald-600" />
-        <StatCard label="Lifetime Swings" value={lifetimeSwings} color="text-rose-600" />
-        <StatCard label="Lifetime Rows" value={lifetimeRows} color="text-cyan-600" />
+          {/* Lifetime totals */}
+          <div className="grid grid-cols-2 gap-3">
+            <StatCard label="Lifetime Pull-ups" value={lifetimePullups} color="text-indigo-600" />
+            <StatCard label="Lifetime Push-ups" value={lifetimePushups} color="text-emerald-600" />
+            <StatCard label="Lifetime Swings" value={lifetimeSwings} color="text-rose-600" />
+            <StatCard label="Lifetime Rows" value={lifetimeRows} color="text-cyan-600" />
+          </div>
+        </div>
       </div>
 
       {/* Recent logs */}

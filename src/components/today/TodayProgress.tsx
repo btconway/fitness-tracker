@@ -32,7 +32,7 @@ export function TodayProgress(props: Props) {
   if (props.rows !== undefined) items.push({ key: 'rows', label: 'Rows' });
 
   return (
-    <div className="flex gap-2 overflow-x-auto py-1">
+    <div className="flex gap-2 overflow-x-auto py-1 lg:flex-wrap lg:overflow-visible">
       {items.map(({ key, label }) => {
         const status = props[key] ?? 'none';
         const style = statusStyles[status];

@@ -320,13 +320,13 @@ export function CalendarView({ initialMonth, initialLogs, todayStr }: Props) {
       </div>
 
       <p className="text-xs text-slate-500 mb-3">
-        Tap a day to view completed entries or upcoming workouts.
+        Tap or click a day to view completed entries or upcoming workouts.
       </p>
 
       {/* Content */}
       <div className={loading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
         {viewMode === 'week' ? (
-          <div className="space-y-2">
+          <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
             {weekDays.map(day => (
               <DayCard key={day.date} day={day} onClick={() => setSelectedDay(day.date)} />
             ))}
@@ -366,7 +366,7 @@ function DayCard({ day, onClick }: { day: DayInfo; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left bg-white rounded-xl border border-zinc-200 border-l-4 ${typeStyle.border} p-3 transition-colors hover:bg-zinc-50 ${
+      className={`h-full w-full text-left bg-white rounded-xl border border-zinc-200 border-l-4 ${typeStyle.border} p-3 transition-colors hover:bg-zinc-50 ${
         day.isFuture ? 'opacity-60' : ''
       } ${day.isToday ? 'ring-2 ring-blue-500' : ''}`}
     >
@@ -446,18 +446,18 @@ function MonthGrid({
   return (
     <>
       {/* Weekday headers */}
-      <div className="grid grid-cols-7 gap-1 mb-1">
+      <div className="mb-2 grid grid-cols-7 gap-1 md:gap-2">
         {WEEKDAYS.map(d => (
-          <div key={d} className="text-center text-[10px] font-medium text-slate-400 py-1">
+          <div key={d} className="py-1 text-center text-[10px] font-medium text-slate-400 md:text-xs">
             {d}
           </div>
         ))}
       </div>
 
       {/* Day cells */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1 md:gap-2">
         {Array.from({ length: startDow }).map((_, i) => (
-          <div key={`empty-${i}`} className="min-h-[52px]" />
+          <div key={`empty-${i}`} className="min-h-[52px] md:min-h-[72px]" />
         ))}
 
         {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -478,11 +478,11 @@ function MonthGrid({
             <button
               key={dayNum}
               onClick={() => onDayClick(dateStr)}
-              className={`min-h-[52px] flex flex-col items-center justify-center rounded-lg p-1 transition-colors ${
+              className={`flex min-h-[52px] flex-col items-center justify-center rounded-lg p-1 transition-colors md:min-h-[72px] md:p-2 lg:min-h-[84px] ${
                 dayInfo.isToday ? 'ring-2 ring-blue-500' : ''
               } ${isSelected ? 'bg-zinc-200' : dayInfo.isProgramActive ? typeStyle.bg : ''} hover:brightness-95`}
             >
-              <span className={`text-xs font-medium ${dayInfo.isToday ? 'text-blue-600' : 'text-slate-700'}`}>
+              <span className={`text-xs font-medium md:text-sm ${dayInfo.isToday ? 'text-blue-600' : 'text-slate-700'}`}>
                 {dayNum}
               </span>
               {dayInfo.isProgramActive && !dayInfo.isFuture && overall !== null ? (
