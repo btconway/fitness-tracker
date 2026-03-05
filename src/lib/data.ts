@@ -1,6 +1,6 @@
 import { sql, isDatabaseConfigured } from '@/lib/db';
 import { serializeDate, serializeTimestamp, getTodayCST, getNowCST, getCycleDay, getCycleWeek, PROGRAM_START } from '@/lib/date';
-import { getFullPlanForDay, getFighterPullupDay, getFighterPushupDay } from '@/lib/program';
+import { getFullPlanForDay, getFighterPullupDay, getFighterPushupDay, computeAutoDeferDates } from '@/lib/program';
 import { getBellPrescription, getQualityDayPrescription } from '@/lib/goals';
 import type { FitnessLog } from '@/lib/types';
 
@@ -43,16 +43,21 @@ export async function getTodayContext() {
   const todayStr = getTodayCST();
   const nowCST = getNowCST();
 
-  const pullupDeferDates = Array.from(new Set(
-    logs
-      .filter(l => l.type === 'PULLUP' && l.value === 'DEFERRED')
-      .map(l => l.date)
+  const pullupLogDates = new Set(logs.filter(l => l.type === 'PULLUP').map(l => l.date));
+  const pullupExplicitDefers = Array.from(new Set(
+    logs.filter(l => l.type === 'PULLUP' && l.value === 'DEFERRED').map(l => l.date)
   ));
-  const pushupDeferDates = Array.from(new Set(
-    logs
-      .filter(l => l.type === 'PUSHUP' && l.value === 'DEFERRED')
-      .map(l => l.date)
+  const pullupDeferDates = computeAutoDeferDates(
+    PROGRAM_START, todayStr, pullupLogDates, pullupExplicitDefers, 'PULLUP'
+  );
+
+  const pushupLogDates = new Set(logs.filter(l => l.type === 'PUSHUP').map(l => l.date));
+  const pushupExplicitDefers = Array.from(new Set(
+    logs.filter(l => l.type === 'PUSHUP' && l.value === 'DEFERRED').map(l => l.date)
   ));
+  const pushupDeferDates = computeAutoDeferDates(
+    PROGRAM_START, todayStr, pushupLogDates, pushupExplicitDefers, 'PUSHUP'
+  );
 
   const cycleDay = getCycleDay(nowCST);
   const plan = getFullPlanForDay(cycleDay);

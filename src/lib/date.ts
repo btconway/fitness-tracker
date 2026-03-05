@@ -25,9 +25,21 @@ export const PROGRAM_START = new Date('2026-02-12T00:00:00-06:00');
 /** ABC cycle start: Feb 16, 2026 (Monday) — aligns weeks to Mon-Sun */
 export const ABC_PROGRAM_START = new Date('2026-02-16T00:00:00-06:00');
 
+/**
+ * One-time ABC schedule overrides: date → cycleDay.
+ * Shifts March 5–7 by 1 day to account for skipping March 4.
+ */
+const ABC_DATE_OVERRIDES: Record<string, number> = {
+  '2026-03-05': 17, // Do March 4's workout (AB Complex + Suitcase)
+  '2026-03-06': 18, // Shifted Ruck day
+  '2026-03-07': 19, // Do Friday's AB Complex on Saturday
+};
+
 /** Calculate the 1-indexed cycle day (1-28) for a given CST date */
 export function getCycleDay(date?: Date): number {
   const target = date ?? getNowCST();
+  const dateStr = formatDate(target);
+  if (ABC_DATE_OVERRIDES[dateStr]) return ABC_DATE_OVERRIDES[dateStr];
   const diffTime = Math.abs(target.getTime() - ABC_PROGRAM_START.getTime());
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   return (diffDays % 28) + 1;

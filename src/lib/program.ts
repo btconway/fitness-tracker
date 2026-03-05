@@ -444,6 +444,62 @@ export const PUSHUP_GTG_PHASE2: PushupDay[] = [
   { day: 18, sets: [], rest: true },
 ];
 
+// ---- Auto-defer: detect missed workout days ----
+
+function isRestDay(effectiveDay: number, type: 'PULLUP' | 'PUSHUP'): boolean {
+  if (type === 'PULLUP') {
+    if (effectiveDay <= 12) return FIGHTER_3RM[effectiveDay - 1].rest;
+    const fiveDay = effectiveDay - 12;
+    if (fiveDay <= 30) return FIGHTER_5RM[fiveDay - 1].rest;
+    return true; // RETEST
+  } else {
+    if (effectiveDay <= 12) return PUSHUP_GTG_PHASE1[effectiveDay - 1].rest;
+    const phase2Day = effectiveDay - 12;
+    if (phase2Day <= 18) return PUSHUP_GTG_PHASE2[phase2Day - 1].rest;
+    return false; // MAINTAIN
+  }
+}
+
+/**
+ * Auto-detect missed weekdays and add them to defer dates.
+ * Walks weekdays from programStart to yesterday. If a weekday has no log
+ * and would have been a non-rest workout day, it's treated as auto-deferred.
+ */
+export function computeAutoDeferDates(
+  programStart: Date,
+  todayStr: string,
+  loggedDates: Set<string>,
+  explicitDeferDates: string[],
+  type: 'PULLUP' | 'PUSHUP'
+): string[] {
+  const startStr = formatDateKey(programStart);
+  const allDefers = [...explicitDeferDates.filter(d => d >= startStr)];
+  const current = new Date(programStart);
+
+  const yesterday = new Date(`${todayStr}T12:00:00-06:00`);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  while (current <= yesterday) {
+    const dow = current.getDay();
+    if (dow !== 0 && dow !== 6) {
+      const dateStr = formatDateKey(current);
+
+      if (!loggedDates.has(dateStr) && !allDefers.includes(dateStr)) {
+        const weekdayCount = countWeekdays(programStart, current);
+        const defersOnOrBefore = allDefers.filter(d => d <= dateStr).length;
+        const effectiveDay = weekdayCount - defersOnOrBefore;
+
+        if (effectiveDay > 0 && !isRestDay(effectiveDay, type)) {
+          allDefers.push(dateStr);
+        }
+      }
+    }
+    current.setDate(current.getDate() + 1);
+  }
+
+  return allDefers;
+}
+
 export function getFighterPushupDay(
   startDate: Date,
   targetDate: Date,

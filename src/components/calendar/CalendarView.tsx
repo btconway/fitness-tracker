@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
 import { getCycleDay, getCycleWeek, PROGRAM_START, getWeekStart, getWeekDates, formatDate } from '@/lib/date';
-import { getFullPlanForDay, getFighterPullupDay, getFighterPushupDay, isSupplementaryDay, SUPPLEMENTARY_PRESCRIPTION } from '@/lib/program';
+import { getFullPlanForDay, getFighterPullupDay, getFighterPushupDay, isSupplementaryDay, SUPPLEMENTARY_PRESCRIPTION, computeAutoDeferDates } from '@/lib/program';
 import type { FitnessLog } from '@/lib/types';
 import type { DayPlan } from '@/lib/program';
 import { DayDetail } from './DayDetail';
@@ -213,22 +213,21 @@ export function CalendarView({ initialMonth, initialLogs, todayStr }: Props) {
     setLogs(prev => prev.filter(l => l.id !== id));
   }
 
-  const pullupDeferDates = useMemo(
-    () => Array.from(new Set(
-      logs
-        .filter(l => l.type === 'PULLUP' && l.value === 'DEFERRED')
-        .map(l => l.date)
-    )),
-    [logs]
-  );
-  const pushupDeferDates = useMemo(
-    () => Array.from(new Set(
-      logs
-        .filter(l => l.type === 'PUSHUP' && l.value === 'DEFERRED')
-        .map(l => l.date)
-    )),
-    [logs]
-  );
+  const pullupDeferDates = useMemo(() => {
+    const loggedDates = new Set(logs.filter(l => l.type === 'PULLUP').map(l => l.date));
+    const explicitDefers = Array.from(new Set(
+      logs.filter(l => l.type === 'PULLUP' && l.value === 'DEFERRED').map(l => l.date)
+    ));
+    return computeAutoDeferDates(PROGRAM_START, todayStr, loggedDates, explicitDefers, 'PULLUP');
+  }, [logs, todayStr]);
+
+  const pushupDeferDates = useMemo(() => {
+    const loggedDates = new Set(logs.filter(l => l.type === 'PUSHUP').map(l => l.date));
+    const explicitDefers = Array.from(new Set(
+      logs.filter(l => l.type === 'PUSHUP' && l.value === 'DEFERRED').map(l => l.date)
+    ));
+    return computeAutoDeferDates(PROGRAM_START, todayStr, loggedDates, explicitDefers, 'PUSHUP');
+  }, [logs, todayStr]);
 
   const weekDays = useMemo(() => {
     if (viewMode !== 'week') return [];
