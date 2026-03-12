@@ -95,7 +95,7 @@ export async function getTodayContext() {
   const lastPushupAt = todayPushups.find(l => !!l.pushup_sets)?.created_at ?? null;
   const lastSwingAt = todaySwings.find(l => !!l.swing_sets)?.created_at ?? null;
 
-  // Bell prescription for volume days (Wed/Fri) and quality days (Mon) in weeks 1-3
+  // Bell prescription for volume days (Day 3/5) and quality days (Day 1) in weeks 1-3
   const cycleWeek = getCycleWeek(cycleDay);
   const dayInWeek = ((cycleDay - 1) % 7) + 1;
   const isVolumeDay = (dayInWeek === 3 || dayInWeek === 5) && cycleWeek <= 3;

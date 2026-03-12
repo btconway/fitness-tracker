@@ -1,5 +1,6 @@
 import { getTodayContext } from '@/lib/data';
-import { isSupplementaryDay, SUPPLEMENTARY_PRESCRIPTION } from '@/lib/program';
+import { isSupplementaryDay } from '@/lib/program';
+import { getSwingPrescription } from '@/lib/goals';
 import { TodayWorkout } from '@/components/today/TodayWorkout';
 import { FighterPullup } from '@/components/today/FighterPullup';
 import { FighterPushup } from '@/components/today/FighterPushup';
@@ -64,7 +65,9 @@ export default async function TodayPage() {
   const pushupStatus = pushupDay.rest ? 'done' : getSetStatus(pushupDay.sets, todayPushupSets);
 
   const showSupplementary = isSupplementaryDay(cycleDay);
-  const swingStatus = showSupplementary ? getSetStatus(SUPPLEMENTARY_PRESCRIPTION.swingSets, todaySwingSets) : undefined;
+  const swingPrescription = showSupplementary ? getSwingPrescription(todayStr) : null;
+  const swingPrescribedReps = swingPrescription?.sets.map(s => s.reps) ?? [];
+  const swingStatus = showSupplementary ? getSetStatus(swingPrescribedReps, todaySwingSets) : undefined;
 
   return (
     <div className="space-y-4">
@@ -95,12 +98,12 @@ export default async function TodayPage() {
             />
           )}
 
-          {showSupplementary && (
+          {showSupplementary && swingPrescription && (
             <KBSwings
               todayStr={todayStr}
               todaySets={todaySwingSets}
               todayTotal={todaySwingTotal}
-              prescribedSets={SUPPLEMENTARY_PRESCRIPTION.swingSets}
+              prescribedSets={swingPrescription.sets}
               lastSetAt={lastSwingAt}
             />
           )}

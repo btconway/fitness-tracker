@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
 import { getCycleDay, getCycleWeek, PROGRAM_START, getWeekStart, getWeekDates, formatDate } from '@/lib/date';
-import { getFullPlanForDay, getFighterPullupDay, getFighterPushupDay, isSupplementaryDay, SUPPLEMENTARY_PRESCRIPTION, computeAutoDeferDates } from '@/lib/program';
+import { getFullPlanForDay, getFighterPullupDay, getFighterPushupDay, isSupplementaryDay, computeAutoDeferDates } from '@/lib/program';
+import { getSwingPrescription } from '@/lib/goals';
 import type { FitnessLog } from '@/lib/types';
 import type { DayPlan } from '@/lib/program';
 import { DayDetail } from './DayDetail';
@@ -65,6 +66,7 @@ function computeDayStatus(
   pullupDay: { sets: number[]; rest: boolean },
   pushupDay: { sets: number[]; rest: boolean },
   cycleDay: number,
+  dateStr: string,
 ): DayStatus {
   const isRecovery = plan.type === 'RECOVERY';
   const hasWorkoutLog = dayLogs.some(l => l.type === 'WORKOUT' || l.type === 'CARRIES');
@@ -84,10 +86,12 @@ function computeDayStatus(
 
   let swings: Status = 'done';
   if (isSupplementaryDay(cycleDay)) {
+    const swingRx = getSwingPrescription(dateStr);
+    const prescribedReps = swingRx?.sets.map(s => s.reps) ?? [25, 25, 25];
     const swingSets = dayLogs
       .filter(l => l.type === 'SWING')
       .flatMap(l => l.swing_sets ? l.swing_sets.split(',').map(s => parseInt(s.trim())) : []);
-    swings = computeSetStatus(SUPPLEMENTARY_PRESCRIPTION.swingSets, swingSets, false);
+    swings = computeSetStatus(prescribedReps, swingSets, false);
   }
 
   return { workout, steps, pullups, pushups, weight, swings };
@@ -111,7 +115,7 @@ function buildDayInfo(
   const isProgramActive = dateStr >= PROGRAM_START_STR;
   const status: DayStatus = isFuture
     ? { workout: 'none', steps: 'none', pullups: 'none', pushups: 'none', weight: 'none', swings: 'none' }
-    : computeDayStatus(dayLogs, plan, pullupDay, pushupDay, cycleDay);
+    : computeDayStatus(dayLogs, plan, pullupDay, pushupDay, cycleDay, dateStr);
 
   return { date: dateStr, cycleDay, cycleWeek, plan, pullupDay, pushupDay, logs: dayLogs, status, isFuture, isToday, isProgramActive };
 }

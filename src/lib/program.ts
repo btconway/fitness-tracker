@@ -222,16 +222,16 @@ export function getFullPlanForDay(cycleDay: number): DayPlan {
   return ABF4FL_PROGRAM[idx];
 }
 
-// ---- Supplementary KB Work (Mon/Fri lifting days) ----
+// ---- Supplementary KB Work (Day 1 & Day 3 lifting days) ----
 
 export const SUPPLEMENTARY_PRESCRIPTION = {
   swingSets: [25, 25, 25] as number[],
 };
 
-/** Supplementary swings on Monday (day 1) and Friday (day 5) of each 7-day cycle week */
+/** Supplementary swings on Day 1 and Day 3 of each 7-day cycle week */
 export function isSupplementaryDay(cycleDay: number): boolean {
   const dayInWeek = ((cycleDay - 1) % 7) + 1;
-  return dayInWeek === 1 || dayInWeek === 5;
+  return dayInWeek === 1 || dayInWeek === 3;
 }
 
 // ---- Fighter Pullup Program ----

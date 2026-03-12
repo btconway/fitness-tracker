@@ -331,6 +331,54 @@ export function computeGoalStatus(logs: FitnessLog[], todayStr: string): GoalSum
   };
 }
 
+// ---- Swing Prescription ----
+
+export interface SwingSet {
+  reps: number;
+  bell: string;
+}
+
+export interface SwingPrescription {
+  sets: SwingSet[];
+  weekNumber: number;
+}
+
+// Week → number of sets at each bell (out of 3 total), ordered light → heavy
+const SWING_SCHEDULE: Record<number, { bell24: number; bell28: number; bell32: number }> = {
+  1: { bell24: 2, bell28: 1, bell32: 0 },
+  2: { bell24: 2, bell28: 1, bell32: 0 },
+  3: { bell24: 1, bell28: 2, bell32: 0 },
+  4: { bell24: 1, bell28: 2, bell32: 0 },
+  5: { bell24: 0, bell28: 3, bell32: 0 },
+  6: { bell24: 0, bell28: 2, bell32: 1 },
+  7: { bell24: 0, bell28: 2, bell32: 1 },
+  8: { bell24: 0, bell28: 1, bell32: 2 },
+};
+
+const SWING_REPS = 25;
+
+export function getSwingPrescription(dateStr: string): SwingPrescription | null {
+  const goalStart = new Date(`${GOAL_START_DATE}T00:00:00-06:00`);
+  const target = new Date(`${dateStr}T00:00:00-06:00`);
+
+  const diffMs = target.getTime() - goalStart.getTime();
+  if (diffMs < 0) return null;
+
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const weekNumber = Math.floor(diffDays / 7) + 1;
+
+  const schedule = weekNumber >= 9
+    ? { bell24: 0, bell28: 0, bell32: 3 }
+    : (SWING_SCHEDULE[weekNumber] ?? { bell24: 0, bell28: 0, bell32: 3 });
+
+  const sets: SwingSet[] = [];
+  for (let i = 0; i < schedule.bell24; i++) sets.push({ reps: SWING_REPS, bell: '24 kg' });
+  for (let i = 0; i < schedule.bell28; i++) sets.push({ reps: SWING_REPS, bell: '28 kg' });
+  for (let i = 0; i < schedule.bell32; i++) sets.push({ reps: SWING_REPS, bell: '32 kg' });
+
+  return { sets, weekNumber };
+}
+
 // ---- Helpers ----
 
 function getISOWeekStart(d: Date): string {

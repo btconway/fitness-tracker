@@ -2,7 +2,8 @@
 
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { Trash2 } from 'lucide-react';
-import { isSupplementaryDay, SUPPLEMENTARY_PRESCRIPTION } from '@/lib/program';
+import { isSupplementaryDay } from '@/lib/program';
+import { getSwingPrescription } from '@/lib/goals';
 import type { DayInfo } from './types';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -162,16 +163,21 @@ export function DayDetail({ dayInfo, onClose, onDeleteLog }: Props) {
           )}
 
           {/* Supplementary KB Work */}
-          {isSupplementaryDay(dayInfo.cycleDay) && (
-            <>
+          {isSupplementaryDay(dayInfo.cycleDay) && (() => {
+            const swingRx = getSwingPrescription(dayInfo.date);
+            if (!swingRx) return null;
+            const bellGroups = swingRx.sets.reduce<Record<string, number>>((acc, s) => {
+              acc[s.bell] = (acc[s.bell] ?? 0) + 1;
+              return acc;
+            }, {});
+            const bellLabel = Object.entries(bellGroups).map(([bell, count]) => `${count}x${swingRx.sets[0].reps} @ ${bell}`).join(', ');
+            return (
               <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 mb-2">
-                <p className="text-xs font-semibold text-rose-700">KB Swings (28 kg)</p>
-                <p className="text-xs text-rose-600 mt-0.5">
-                  Sets: {SUPPLEMENTARY_PRESCRIPTION.swingSets.join(', ')} ({SUPPLEMENTARY_PRESCRIPTION.swingSets.reduce((a, b) => a + b, 0)} total)
-                </p>
+                <p className="text-xs font-semibold text-rose-700">KB Swings</p>
+                <p className="text-xs text-rose-600 mt-0.5">{bellLabel}</p>
               </div>
-            </>
-          )}
+            );
+          })()}
 
           {/* Steps Goal */}
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
