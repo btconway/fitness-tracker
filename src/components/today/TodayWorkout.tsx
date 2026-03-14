@@ -56,7 +56,8 @@ export function TodayWorkout({ plan, todayStr, alreadyLogged, bellPrescription }
   const roundOptions: number[] = [];
   if (hasRounds) {
     for (let r = minR; r <= Math.min(maxR, 10); r++) roundOptions.push(r);
-    if (maxR > 10) roundOptions.push(maxR);
+    for (let r = 15; r <= maxR; r += 5) if (r > 10 && r > minR) roundOptions.push(r);
+    if (maxR > 10 && maxR % 5 !== 0) roundOptions.push(maxR);
   }
 
   async function handleLog() {
