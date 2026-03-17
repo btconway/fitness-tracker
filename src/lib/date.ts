@@ -25,8 +25,8 @@ export const PROGRAM_START = new Date('2026-02-12T00:00:00-06:00');
 /** ABC cycle start: Feb 16, 2026 (Monday) — aligns weeks to Mon-Sun */
 export const ABC_PROGRAM_START = new Date('2026-02-16T00:00:00-06:00');
 
-/** New cycle start: Mar 18, 2026 (Wednesday) — fresh cycle after compressed Week 4 */
-export const ABC_PROGRAM_START_V2 = new Date('2026-03-18T00:00:00-06:00');
+/** New cycle start: Mar 21, 2026 (Saturday) — fresh cycle after compressed Week 4, shifted for missed Mar 16 */
+export const ABC_PROGRAM_START_V2 = new Date('2026-03-21T00:00:00-06:00');
 
 /**
  * One-time ABC schedule overrides: date → cycleDay.
@@ -41,8 +41,11 @@ const ABC_DATE_OVERRIDES: Record<string, number> = {
   '2026-03-13': 27, // Recovery
   '2026-03-14': 24, // Week 4, Day 3: AB Complex 10-30 rounds + Racked Carries
   '2026-03-15': 27, // Recovery
-  '2026-03-16': 26, // Week 4, Day 5: Hypertrophy Press + Suitcase Carries
-  '2026-03-17': 27, // Recovery
+  '2026-03-16': 26, // Week 4, Day 5: Hypertrophy Press + Suitcase Carries (missed)
+  '2026-03-17': 26, // Moved: do Mar 16's Hypertrophy Press + Suitcase Carries today
+  '2026-03-18': 27, // Recovery (Mar 18 workout moved to Saturday)
+  '2026-03-19': 27, // Recovery
+  '2026-03-20': 27, // Recovery
 };
 
 /** Calculate the 1-indexed cycle day (1-28) for a given CST date */
